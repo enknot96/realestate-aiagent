@@ -23,7 +23,14 @@ export default function Home() {
             }`}
           >
             {message.parts.map((part, index) =>
-              part.type === "text" ? <span key={index}>{part.text}</span> : null,
+              part.type === "text" ? (
+                <span key={index}>{part.text}</span>
+              ) : (
+                // ツール呼び出し等の非テキストパートは、フェーズ5で本格可視化するまで生表示
+                <pre key={index} className="overflow-x-auto text-xs text-gray-500">
+                  {JSON.stringify(part, null, 2)}
+                </pre>
+              ),
             )}
           </div>
         ))}
