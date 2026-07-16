@@ -85,6 +85,87 @@ export const searchProperties = tool({
   },
 });
 
+type PropertyDetail = {
+  id: number;
+  type: "rent" | "sale";
+  title: string;
+  description: string | null;
+  price: number;
+  layout: string | null;
+  area: string | null;
+  address: string;
+  status: string;
+};
+
+export const getPropertyDetail = tool({
+  description: "物件IDを指定して、物件の詳細情報（説明文の全文を含む）を取得する。",
+  inputSchema: z.object({
+    id: z.number().int().positive().describe("物件ID。searchPropertiesの結果に含まれる"),
+  }),
+  execute: async (input) => {
+    try {
+      const p = await realestateApiFetch<PropertyDetail>(`/properties/${input.id}`);
+      return {
+        id: p.id,
+        type: p.type,
+        title: p.title,
+        description: p.description,
+        price: p.price,
+        layout: p.layout,
+        area: p.area,
+        address: p.address,
+      };
+    } catch (error) {
+      return toToolError(error);
+    }
+  },
+});
+
+type AvailabilityResponse = {
+  propertyId: number;
+  days: {
+    date: string;
+    slots: { startAt: string; available: boolean }[];
+  }[];
+};
+
+export const checkViewingAvailability = tool({
+  description:
+    "物件の内見可能な空き枠を確認する。営業時間はJST 10:00〜18:00の1時間枠。" +
+    "期間は最大7日間まで指定できる。結果は日付ごとの空き枠開始時刻(ISO形式)のリスト。",
+  inputSchema: z.object({
+    propertyId: z.number().int().positive().describe("物件ID"),
+    from: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .describe("期間の開始日（YYYY-MM-DD）。今日以降の日付を指定する"),
+    to: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .describe("期間の終了日（YYYY-MM-DD）。fromから7日未満の範囲"),
+  }),
+  execute: async (input) => {
+    const params = new URLSearchParams({ from: input.from, to: input.to });
+    try {
+      const result = await realestateApiFetch<AvailabilityResponse>(
+        `/properties/${input.propertyId}/availability?${params.toString()}`,
+      );
+      return {
+        propertyId: result.propertyId,
+        // モデルのコンテキスト節約のため、空いている枠の開始時刻だけを渡す
+        days: result.days.map((day) => ({
+          date: day.date,
+          availableStartAts: day.slots.filter((s) => s.available).map((s) => s.startAt),
+        })),
+      };
+    } catch (error) {
+      return toToolError(error);
+    }
+  },
+});
+
 export const agentTools = {
   searchProperties,
+  getPropertyDetail,
+  checkViewingAvailability,
 };
