@@ -1,341 +1,184 @@
-下記はAI実行時のやり取り
-理解できるよう、一旦メモで残しておく
+# 不動産AIエージェント
 
-不動産AIエージェント
+自作の[不動産業務管理API（ポートフォリオ④）](https://github.com/YOUR-ACCOUNT/realestate-api)を「道具」として使い、物件探しから内見予約までをAIが多段のツール連鎖で進めるエージェントです。Next.js (App Router) + Vercel AI SDK v7 + Gemini で実装しています。
 
-↓　これがユーザーの送信
-コーポやまぼうしB棟の内見を予約したいです。明日の10時でお願いします。名前は山田太郎、メールは yamada@example.com です。
+- **デモ**: https://YOUR-DEPLOYMENT-URL.vercel.app （デプロイ後に差し替え）
+- **デモ動画**: （GIFをここに挿入）
 
-↓　以下、AIの思考
-{
-"type": "step-start"
-}
-{
-"type": "tool-searchProperties",
-"toolCallId": "jcEc2KE2",
-"state": "output-available",
-"input": {
-"type": "rent",
-"keyword": "コーポやまぼうしB棟",
-"limit": 5
-},
-"output": {
-"total": 0,
-"properties": []
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPf0guPlan+C1Zw4jDpNYCPjBHF5xqOGcQMgEYgIS5UHOKlnw+0XC6Vym6hX0r"
-}
-},
-"resultProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPf0guPlan+C1Zw4jDpNYCPjBHF5xqOGcQMgEYgIS5UHOKlnw+0XC6Vym6hX0r"
-}
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-searchProperties",
-"toolCallId": "IQdbIVxr",
-"state": "output-available",
-"input": {
-"type": "rent",
-"keyword": "コーポやまぼうし",
-"limit": 5
-},
-"output": {
-"total": 1,
-"properties": [
-{
-"id": 4,
-"type": "rent",
-"title": "八王子駅バス5分 ペット可2LDK コーポやまぼうし B棟",
-"price": 69500,
-"layout": "2LDK",
-"area": "60.80",
-"address": "東京都八王子市子安町2-9-4",
-"description": "犬猫合わせて2匹まで飼育可。バス停まで徒歩1分、八王子駅までバス5分。60㎡超のゆとりある間取りで、ペット用クロス・傷に強い床材を採用したリノベーション済み物件です。"
-}
-]
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPRgteBteMxfDFCeflbW6XKLjIKS0Y8FpipYkUct7V7Gg27lBWAQXXCoKeqHyt"
-}
-},
-"resultProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPRgteBteMxfDFCeflbW6XKLjIKS0Y8FpipYkUct7V7Gg27lBWAQXXCoKeqHyt"
-}
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-checkViewingAvailability",
-"toolCallId": "bzAdNnIG",
-"state": "output-available",
-"input": {
-"propertyId": 4,
-"from": "2026-07-18",
-"to": "2026-07-24"
-},
-"output": {
-"propertyId": 4,
-"days": [
-{
-"date": "2026-07-18",
-"availableStartAts": [
-"2026-07-18T10:00:00+09:00",
-"2026-07-18T11:00:00+09:00",
-"2026-07-18T12:00:00+09:00",
-"2026-07-18T13:00:00+09:00",
-"2026-07-18T14:00:00+09:00",
-"2026-07-18T15:00:00+09:00",
-"2026-07-18T16:00:00+09:00",
-"2026-07-18T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-19",
-"availableStartAts": [
-"2026-07-19T10:00:00+09:00",
-"2026-07-19T11:00:00+09:00",
-"2026-07-19T12:00:00+09:00",
-"2026-07-19T13:00:00+09:00",
-"2026-07-19T14:00:00+09:00",
-"2026-07-19T15:00:00+09:00",
-"2026-07-19T16:00:00+09:00",
-"2026-07-19T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-20",
-"availableStartAts": [
-"2026-07-20T10:00:00+09:00",
-"2026-07-20T11:00:00+09:00",
-"2026-07-20T12:00:00+09:00",
-"2026-07-20T13:00:00+09:00",
-"2026-07-20T14:00:00+09:00",
-"2026-07-20T15:00:00+09:00",
-"2026-07-20T16:00:00+09:00",
-"2026-07-20T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-21",
-"availableStartAts": [
-"2026-07-21T10:00:00+09:00",
-"2026-07-21T11:00:00+09:00",
-"2026-07-21T12:00:00+09:00",
-"2026-07-21T13:00:00+09:00",
-"2026-07-21T14:00:00+09:00",
-"2026-07-21T15:00:00+09:00",
-"2026-07-21T16:00:00+09:00",
-"2026-07-21T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-22",
-"availableStartAts": [
-"2026-07-22T10:00:00+09:00",
-"2026-07-22T11:00:00+09:00",
-"2026-07-22T12:00:00+09:00",
-"2026-07-22T13:00:00+09:00",
-"2026-07-22T14:00:00+09:00",
-"2026-07-22T15:00:00+09:00",
-"2026-07-22T16:00:00+09:00",
-"2026-07-22T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-23",
-"availableStartAts": [
-"2026-07-23T10:00:00+09:00",
-"2026-07-23T11:00:00+09:00",
-"2026-07-23T12:00:00+09:00",
-"2026-07-23T13:00:00+09:00",
-"2026-07-23T14:00:00+09:00",
-"2026-07-23T15:00:00+09:00",
-"2026-07-23T16:00:00+09:00",
-"2026-07-23T17:00:00+09:00"
-]
-},
-{
-"date": "2026-07-24",
-"availableStartAts": [
-"2026-07-24T10:00:00+09:00",
-"2026-07-24T11:00:00+09:00",
-"2026-07-24T12:00:00+09:00",
-"2026-07-24T13:00:00+09:00",
-"2026-07-24T14:00:00+09:00",
-"2026-07-24T15:00:00+09:00",
-"2026-07-24T16:00:00+09:00",
-"2026-07-24T17:00:00+09:00"
-]
-}
-]
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPhkqeifG1+ct3c8YthUzy/J3/3BatPfzSg6+A0PcetBA3Nac5h4YdINkMsmn4"
-}
-},
-"resultProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPhkqeifG1+ct3c8YthUzy/J3/3BatPfzSg6+A0PcetBA3Nac5h4YdINkMsmn4"
-}
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-prepareInquiryConfirmation",
-"toolCallId": "MjfGrEFN",
-"state": "output-available",
-"input": {
-"propertyId": 4,
-"name": "山田太郎",
-"email": "yamada@example.com",
-"message": "内見を希望します。"
-},
-"output": {
-"confirmationToken": "1784295106314.780eb01dceec19522a7b7ba53c7930ce68d49455257b71170a440db332cebceb",
-"summary": "物件ID 4 に「山田太郎」名義で問い合わせを送信します"
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIP50euLthPrhFULQN6IiUHKKvY7QOSBlP3/ggN6yZ7IQTzlfy1F7C4jmX0TVKa"
-}
-},
-"resultProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIP50euLthPrhFULQN6IiUHKKvY7QOSBlP3/ggN6yZ7IQTzlfy1F7C4jmX0TVKa"
-}
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-createInquiry",
-"toolCallId": "TFZI7NpP",
-"state": "output-available",
-"input": {
-"propertyId": 4,
-"name": "山田太郎",
-"email": "yamada@example.com",
-"message": "内見を希望します。",
-"confirmationToken": "1784295106314.780eb01dceec19522a7b7ba53c7930ce68d49455257b71170a440db332cebceb"
-},
-"output": {
-"inquiryId": 10,
-"status": "new"
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIP/o2iMkJzGAO86d3aJ+bPcfjaKaFJb0eT3FJYDE3GqYJDQbQhM9XwgtOGbemk"
-}
-},
-"approval": {
-"id": "aitxt-R54u3J0pS8T3Y4t3tUU66TN4",
-"approved": true
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-prepareViewingConfirmation",
-"toolCallId": "dXuuXXWB",
-"state": "output-available",
-"input": {
-"inquiryId": 10,
-"scheduledAt": "2026-07-18T10:00:00+09:00"
-},
-"output": {
-"confirmationToken": "1784295121558.914cd2a68b5c8836186840c8dee3d83af89a26ee19eaaf4a9d4717ffacabb0b2",
-"summary": "問い合わせID 10 に 2026-07-18T10:00:00+09:00 の内見予約を作成します"
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPa0selm8+9mW+eQIcS60zQwIbUGdBvddk57Uu98CsxIoobJCHettB/92YriRn"
-}
-},
-"resultProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPa0selm8+9mW+eQIcS60zQwIbUGdBvddk57Uu98CsxIoobJCHettB/92YriRn"
-}
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-createViewing",
-"toolCallId": "zS0RGdHt",
-"state": "output-available",
-"input": {
-"inquiryId": 10,
-"scheduledAt": "2026-07-18T18:00:00+09:00",
-"confirmationToken": "1784295121558.914cd2a68b5c8836186840c8dee3d83af89a26ee19eaaf4a9d4717ffacabb0b2"
-},
-"output": {
-"error": {
-"code": "CONFIRMATION_MISMATCH",
-"message": "引数が確認時の内容と一致しません。内容を変える場合は、もう一度確認からやり直してください"
-}
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIP8VDj/nAfvIpNU4laIwMEhK+o6GP5avoiX7fWaj+lBOd821GVQwwXxfWkdo0V"
-}
-},
-"approval": {
-"id": "aitxt-lDeeoBcQ7zbHN9wjpRAyUR8U",
-"approved": true
-}
-}
-{
-"type": "step-start"
-}
-{
-"type": "tool-createViewing",
-"toolCallId": "2ZiKpe0o",
-"state": "output-available",
-"input": {
-"inquiryId": 10,
-"scheduledAt": "2026-07-18T10:00:00+09:00",
-"confirmationToken": "1784295121558.914cd2a68b5c8836186840c8dee3d83af89a26ee19eaaf4a9d4717ffacabb0b2"
-},
-"output": {
-"viewingId": 6,
-"scheduledAt": "2026-07-18T01:00:00.000Z",
-"status": "scheduled"
-},
-"callProviderMetadata": {
-"google": {
-"thoughtSignature": "EjQKMgERTTIPTxB2Nj9lfTawYdyhh0o/2KWN+8rK7AmWkfao9vGCoOhYSPlabnH5Zw01N1SE"
-}
-},
-"approval": {
-"id": "aitxt-4Y1If09p46eBtBwFJ6BgLuaq",
-"approved": true
-}
-}
-{
-"type": "step-start"
-}
+> 🎬 **30秒で分かるこの作品**: 「予算8万円以内、ペット可の2LDKを探して」と話しかけると、AIが実際のAPIを検索し、0件なら自分の判断で条件を緩めて再検索し、内見の空き枠を確認し、ユーザーの承認を得てから本物のDBに予約を書き込みます。書き込み直前には、承認した内容とAPIに送られる内容の一致をHMAC署名で検証します。
 
-↓　以下、AIの回答
-コーポやまぼうしB棟の内見予約が完了いたしました。
+## 目次
 
-- **日時**: 2026年7月18日（明日） 10:00
-- **場所**: 八王子駅バス5分 ペット可2LDK コーポやまぼうし B棟（東京都八王子市子安町2-9-4）
+- [レビューする際に見ていただきたいポイント](#レビューする際に見ていただきたいポイント)
+- [この作品が証明したいこと](#この作品が証明したいこと)
+- [アーキテクチャ](#アーキテクチャ)
+- [エージェント設計](#エージェント設計)
+- [安全設計（human-in-the-loop）](#安全設計human-in-the-loop)
+- [品質保証: 非決定的なエージェントをどうテストするか](#品質保証-非決定的なエージェントをどうテストするか)
+- [可観測性（Langfuse）](#可観測性langfuse)
+- [失敗ハンドリング](#失敗ハンドリング)
+- [プロンプト設計](#プロンプト設計)
+- [技術スタック](#技術スタック)
+- [セットアップ](#セットアップ)
+- [意図的な簡略化・既知の制約](#意図的な簡略化既知の制約)
 
-当日はお気をつけてお越しください。何かご不明な点がありましたらお知らせください。
+## レビューする際に見ていただきたいポイント
+
+お時間が限られている場合は、特に以下をご覧ください。
+
+| ポイント | ファイル | 内容 |
+|---|---|---|
+| 承認引数のHMAC一致検証 | [`src/lib/approvalSignature.ts`](src/lib/approvalSignature.ts) / [`src/ai/tools.ts`](src/ai/tools.ts) | 「ユーザーが承認した内容」と「④APIに送られる内容」の一致を暗号学的に保証。**初回のE2Eテストで、モデルが承認済みの10:00を18:00に取り違えて実行しようとしたのを実際にブロックした**（下記に詳細） |
+| エージェントの回帰テスト（evals） | [`tests/evals/agentJudgment.eval.test.ts`](tests/evals/agentJudgment.eval.test.ts) | 「検索0件→条件を緩めた再検索が起きるか」を、④APIをモックした固定シナリオ×実モデルでアサート |
+| 承認ゲートの決定的テスト | [`tests/unit/approvalGate.test.ts`](tests/unit/approvalGate.test.ts) | 「いきなり書き込みツールを呼ぶモデル」を`MockLanguageModelV4`に演じさせ、承認なしに実行されないことを毎回のテストで検証 |
+| モデルフォールバック | [`src/ai/model.ts`](src/ai/model.ts) | 主モデルの503/429時に別モデルへ自動切替（無料枠はモデル別のため実効枠が合算される） |
+| エージェント本体の分離 | [`src/ai/agent.ts`](src/ai/agent.ts) | プロンプト＋ツール＋実行設定を`runAgent()`に集約し、HTTPルートとevalsが同一実体を使う |
+| JWTのサーバー内完結 | [`src/lib/agentAuth.ts`](src/lib/agentAuth.ts) | ④の認証トークンをサーバー側でのみ取得・キャッシュ。`server-only`でクライアント混入をビルド時に遮断 |
+
+## この作品が証明したいこと
+
+ポートフォリオ全体の中で、この作品は「**AIが判断してツールを呼び、多段で仕事を進める（agentic）**」を担当しています。
+
+1. **検索 vs 行動**: RAG検索の作品②が「検索して答える」のに対し、⑥は「状況を判断して行動する」。1往復のQ&Aではなく、検索→判断→再検索→空き枠確認→承認→書き込みという多段フローを自律的に進めます
+2. **④との接続**: ツールの実体はモックではなく、**自分で設計・実装・デプロイした本物のREST API**です。API設計力とエージェント設計を一本の線でつなげています。エージェント側の要求（内見空き枠の確認）に応じて④に公開エンドポイントを追加するなど、APIを進化させる方向の作業も発生しました
+3. **前職ドメインの反映**: ハウスメーカー営業6年の経験を、検索0件時の条件緩和の優先順位（予算を少し上げる→間取りを広げる。ペット可などのこだわり条件は勝手に外さない — お客様の妥協しやすさの実感に基づく）としてエージェントの判断ロジックに落とし込んでいます
+
+## アーキテクチャ
+
+```
+┌──────────────┐   useChat / 承認UI / 空き枠チップ
+│   ブラウザ    │  （ツール実行の途中経過を逐次表示）
+└──────┬───────┘
+       │ UIメッセージストリーム (SSE)
+┌──────▼──────────────────────────────────────┐
+│  Next.js (App Router) — このリポジトリ        │
+│  /api/chat: streamText + 7ツール + 承認ゲート │
+│  ・HMAC署名の発行/検証（承認引数の一致保証）    │
+│  ・④のJWTをサーバー内でのみ取得・キャッシュ    │
+└───┬──────────────┬──────────────┬───────────┘
+    │ tool calling  │ HTTP(S)      │ OpenTelemetry
+┌───▼────────┐ ┌───▼──────────┐ ┌─▼──────────┐
+│ Gemini      │ │ ④不動産業務  │ │ Langfuse    │
+│ 3.5-flash   │ │ 管理API      │ │ Cloud       │
+│ ↓fallback   │ │ (Hono+Neon,  │ │ (トレース)   │
+│ 3.1-flash-  │ │  Vercel)     │ │             │
+│ lite        │ │              │ │             │
+└─────────────┘ └──────────────┘ └─────────────┘
+```
+
+## エージェント設計
+
+### ツール一覧（④APIの道具化）
+
+読み取り系と書き込み系を明確に分け、書き込み系にだけ承認を要求します。
+
+| ツール | ④のエンドポイント | 認証 | 承認 |
+|---|---|---|---|
+| `searchProperties` | `GET /properties` | 不要 | — |
+| `getPropertyDetail` | `GET /properties/:id` | 不要 | — |
+| `checkViewingAvailability` | `GET /properties/:id/availability` ※ | 不要 | — |
+| `prepareInquiryConfirmation` | （④を呼ばずHMAC発行） | — | — |
+| `createInquiry` | `POST /properties/:id/inquiries` | 不要 | **必要** |
+| `prepareViewingConfirmation` | （④を呼ばずHMAC発行） | — | — |
+| `createViewing` | `POST /inquiries/:id/viewings` | **JWT** | **必要** |
+
+※ エージェントのために④側へ新規追加した公開エンドポイント。
+
+### 「単なるツール呼び出し」と「エージェント」の分かれ目
+
+状況に応じて次の手を変える判断をシステムプロンプトの`<decision_rules>`で設計しています。
+
+- **検索0件** → 条件を1つだけ緩めて自動再検索（①予算を1割増 → ②それでも0件なら予算は戻して間取り指定を外す）。**こだわり条件（ペット可など）はユーザーの意思なので勝手に外さない**。緩和したことと元の条件では0件だったことを必ず正直に報告し、2段の緩和でも0件ならユーザーに相談へ切り替える
+- **多数ヒット** → 全件列挙せず、総件数を伝えて絞り込み条件を質問する
+- **日時の合意** → ユーザーが日時を指定済みでも、空き枠を確認して「◯月◯日◯時で進めます」と明言してから予約フローに入る
+
+## 安全設計（human-in-the-loop）
+
+書き込み（問い合わせ作成・内見予約）は、3層のガードを通らないと実行されません。
+
+1. **承認ゲート（AI SDK v7の`toolApproval`）**: AIが書き込みツールを呼ぶと実行前にストリームが停止し、引数を日本語で整形した承認カードがUIに表示されます。ユーザーが承認して初めてサーバーの`execute`が動き、拒否すればその意思がAIに伝わります
+2. **HMAC署名による引数一致検証**: 書き込みツールは、直前に`prepare`系ツールがサーバー秘密鍵で発行した「引数一式＋ツール種別＋有効期限10分」への署名を要求します。**引数が1文字でも変わると検証に失敗して実行拒否**。ステートレスなのでサーバーレス環境でもそのまま動きます
+3. **認証情報のサーバー内完結**: ④のJWTはサーバー側でのみ取得・キャッシュし（期限1分前に再取得・401で再ログイン1回）、クライアントには一切渡しません。`import "server-only"`により、誤ってクライアントバンドルに混入するとビルドが失敗します
+
+### 設計が実際に働いた話
+
+初回のE2Eテストで、ユーザーが承認したのは「7/18 **10:00**」の内見予約でしたが、モデルは`createViewing`を「7/18 **18:00**」（空き枠にすら存在しない時刻）で実行しようとしました。HMAC検証が`CONFIRMATION_MISMATCH`で実行を拒否し、④へのリクエストは発生せず、エラーを受け取ったモデルは自分で気づいて10:00で正しくやり直しました。「承認した内容と実行される内容の一致検証は本当に必要か」への答えが、本番初回で実演された形です。
+
+## 品質保証: 非決定的なエージェントをどうテストするか
+
+プロンプトを1行変えると挙動が変わるエージェントに対して、2種類の自動テストを用意しています。
+
+| 種類 | 実行 | 対象 | 方法 |
+|---|---|---|---|
+| ユニットテスト15件 | `pnpm test`（毎回） | HMAC署名・JWTキャッシュ・エラー整形・**承認ゲート** | 承認ゲートは`MockLanguageModelV4`に「いきなり書き込みツールを呼ぶ台本」を演じさせ、承認なしに`execute`が走らないことを決定的に検証 |
+| エージェントevals 2件 | `pnpm test:evals`（明示実行） | **モデルの判断そのもの** | ④APIをモックして「6.5万円は0件・7.15万円なら1件」のシナリオを固定し、実モデルで「条件を緩めた再検索が発生する」「氏名・メール未提供のうちは書き込みツールを呼ばない」をツール呼び出し列でアサート |
+
+役割分担のポイント: 「判断の質」は実モデルでしか測れないため④側をモックして決定化し、「安全構造」はモデルをモックして毎回のテストに組み込む、という使い分けをしています。実モデルevalsは無料枠を消費するため通常のテストから分離しています。
+
+## 可観測性（Langfuse）
+
+Vercel AI SDKのOpenTelemetryテレメトリをLangfuse Cloudに送り、モデル呼び出し・ツール実行・マルチステップの流れをトレースとして可視化しています。
+
+（Langfuseのトレース画面のスクリーンショットをここに挿入）
+
+- Next.jsの計装フック（`src/instrumentation.ts`）で`LangfuseSpanProcessor`を登録
+- Vercelのサーバーレスではレスポンス送信後に関数が凍結されるため、`next/server`の`after()`で**応答完了後に`forceFlush()`** してトレース欠落を防いでいます
+- プロンプト調整やevalsのデバッグで「どのステップで・どのツールが・どの引数で呼ばれたか」を追う実利もありました
+
+## 失敗ハンドリング
+
+エラーを握りつぶさない、を原則にしています。
+
+- **モデル側の503/429**: `ai-fallback`で`gemini-3.5-flash`→`gemini-3.1-flash-lite`へ自動切替（リトライ可能なエラーのみ・60秒後に主モデルへ復帰）。無料枠はモデルごとに別枠のため、実効的な枠の合算にもなっています。開発中に実際に3.5-flashの503が頻発した実体験から、フォールバック先が7ツールの多段フローを完走できることも検証済みです
+- **無料枠の枯渇（429）**: 「本日のデモ利用枠を使い切りました」と正直に表示します（デモという性質上、自前のレート制限は作り込まない割り切り）
+- **④API側の障害**: ツールは接続失敗やエラーレスポンスを構造化（`{error: {code, message}}`）してAIに返し、AIが正直に報告・リカバリします。検索0件→条件変更、HMAC不一致→確認からやり直し、といった自己修正が実際に動作しています
+
+## プロンプト設計
+
+Googleの公式プロンプト設計ガイドの推奨に基づき、システムプロンプトをXMLスタイルのタグで構造化しています（[`src/ai/agent.ts`](src/ai/agent.ts)）。
+
+- `<role>` / `<current_context>`（現在日時=動的データ） / `<tool_policy>` / `<decision_rules>` / `<safety_rules>` / `<response_style>` に分離
+- 「指示」と「動的データ」を混ぜないことでインジェクション耐性と保守性を確保。フェーズが進むごとに正しいセクションへルールを追記するだけで済みました
+- 開発中に観測したモデルの癖（「ツールを呼ばずに宣言だけしてターンを終える」「承認拒否をシステムエラーと誤解する」）を、ルールとして矯正した経緯もプロンプトに残っています
+
+## 技術スタック
+
+| 分類 | 採用技術 | 補足 |
+|---|---|---|
+| FW | Next.js 16 (App Router) | Route Handler + `after()` |
+| エージェント | Vercel AI SDK v7 | `streamText`マルチステップ・`tool()`・`toolApproval`・`isStepCount` |
+| モデル | Gemini 3.5 Flash（無料枠） | `ai-fallback`で3.1 Flash-Liteへ自動切替 |
+| ツールの実体 | ④不動産業務管理API | Hono + Drizzle + Neon（別リポジトリ・デプロイ済み） |
+| 可観測性 | Langfuse Cloud | OpenTelemetry経由・無料プラン |
+| UI | React 19 + Tailwind CSS v4 | ツール実行タイムライン・承認カード・空き枠チップ |
+| テスト | Vitest | ユニット15件＋実モデルevals 2件（分離実行） |
+| 開発体制 | Claude Code（Anthropic）とのペアプログラミング | 設計の壁打ち・レビュー・実装を協働 |
+
+## セットアップ
+
+```bash
+pnpm install
+cp .env.example .env.local  # 各値を記入（下表）
+pnpm dev
+```
+
+| 環境変数 | 内容 |
+|---|---|
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI StudioのAPIキー |
+| `REALESTATE_API_BASE_URL` | ④APIのベースURL |
+| `DEMO_AGENT_EMAIL` / `DEMO_AGENT_PASSWORD` | ④のデモ用エージェント（`createViewing`のJWT取得に使用・サーバー側のみ） |
+| `APPROVAL_SIGNATURE_SECRET` | 承認引数HMAC署名の秘密鍵（`openssl rand -hex 32`等で生成） |
+| `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_BASE_URL` | Langfuseの接続情報（未設定ならトレーシングは自動で無効化） |
+
+```bash
+pnpm test        # ユニットテスト（15件・モデル呼び出しなし）
+pnpm test:evals  # エージェントevals（実モデルを叩くため明示実行）
+```
+
+## 意図的な簡略化・既知の制約
+
+- **顧客の本人認証は範囲外**: チャットするユーザー＝問い合わせ主とみなし、会員登録やメール認証は作りません（エージェントの多段判断が主役のため）
+- **会話履歴の永続化なし**: リロードで消えます。セッション管理はこの作品の証明したいことに含めていません
+- **承認フローの残余リスク**: 承認とツール呼び出しの紐付けはAI SDKが管理し、引数の一致はHMACで保証しますが、クライアントが自分の会話履歴を改ざんする攻撃への完全な防御（履歴自体の署名）はデモの範囲外としています。最終防衛線は④API側のバリデーション・認可です
+- **無料枠の制約**: Gemini無料枠（RPD上限）を使い切ると、その日はデモが応答しなくなります。フォールバックで実効枠を広げつつ、枯渇時は正直に表示します
+- **UIはライトテーマ固定**: ダークモード対応より、ツール実行の可視化と承認UXに工数を割きました
