@@ -1,5 +1,5 @@
-import { google } from "@ai-sdk/google";
 import {
+  APICallError,
   convertToModelMessages,
   createUIMessageStreamResponse,
   isStepCount,
@@ -8,6 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 import { after } from "next/server";
+import { agentModel } from "@/ai/model";
 import { agentTools } from "@/ai/tools";
 import { langfuseSpanProcessor } from "@/lib/telemetry";
 
@@ -76,9 +77,7 @@ export async function POST(req: Request) {
   after(() => langfuseSpanProcessor.forceFlush());
 
   const result = streamText({
-    // 一時的にflash-liteへ切替中（2026/07/17夜、3.5-flashが継続的に503のため）。
-    // 恒久対応（自動フォールバック）はフェーズ6で実装し、その際に戻す
-    model: google("gemini-3.1-flash-lite"),
+    model: agentModel,
     instructions: buildInstructions(),
     messages: await convertToModelMessages(messages),
     tools: agentTools,
@@ -95,6 +94,15 @@ export async function POST(req: Request) {
   });
 
   return createUIMessageStreamResponse({
-    stream: toUIMessageStream({ stream: result.stream }),
+    stream: toUIMessageStream({
+      stream: result.stream,
+      // サーバーの詳細は漏らさず、ユーザーが次に取るべき行動が分かる文言だけを返す
+      onError: (error) => {
+        if (APICallError.isInstance(error) && error.statusCode === 429) {
+          return "本日のデモ利用枠（無料プランの上限）を使い切りました。恐れ入りますが、日を改めてお試しください。";
+        }
+        return "AIモデル側で一時的なエラーが発生しました。少し時間をおいて、もう一度お試しください。";
+      },
+    }),
   });
 }

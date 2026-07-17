@@ -337,8 +337,9 @@ export default function Home() {
         )}
         {error && (
           <div className="self-start rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-            エラーが発生しました（AIモデル側の一時的な混雑の可能性があります）。
-            少し時間をおいて、もう一度お試しください。
+            {error.message && error.message !== "An error occurred."
+              ? error.message
+              : "エラーが発生しました。少し時間をおいて、もう一度お試しください。"}
           </div>
         )}
       </div>
