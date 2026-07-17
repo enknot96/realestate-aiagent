@@ -1,6 +1,8 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { realestateApiFetch, RealestateApiError } from "@/lib/realestateApi";
+import { getAgentAccessToken, invalidateAgentToken } from "@/lib/agentAuth";
+import { signApprovalPayload, verifyApprovalPayload } from "@/lib/approvalSignature";
 
 type PropertyListResponse = {
   properties: {
@@ -164,8 +166,139 @@ export const checkViewingAvailability = tool({
   },
 });
 
+// ── 書き込み系（human-in-the-loop） ──
+// 2段階の設計: prepare系ツールが引数一式へのHMAC署名（確認トークン）を発行し、
+// create系ツールは「同一の引数＋有効なトークン」でなければ実行を拒否する。
+// これにより「ユーザーに提示・承認された内容」と「④へ送られる内容」の一致をサーバー側で保証する。
+
+const inquiryPayloadSchema = z.object({
+  propertyId: z.number().int().positive().describe("問い合わせ対象の物件ID"),
+  name: z.string().min(1).describe("ユーザー本人に確認した氏名"),
+  email: z.email().describe("ユーザー本人に確認したメールアドレス"),
+  phone: z.string().min(1).optional().describe("電話番号（任意）"),
+  message: z.string().min(1).describe("問い合わせ内容"),
+});
+
+const viewingPayloadSchema = z.object({
+  inquiryId: z.number().int().positive().describe("createInquiryが返した問い合わせID"),
+  scheduledAt: z
+    .string()
+    .describe(
+      "内見日時。checkViewingAvailabilityが返した空き枠のstartAt（ISO 8601形式）をそのまま使う",
+    ),
+});
+
+export const prepareInquiryConfirmation = tool({
+  description:
+    "問い合わせ送信の確認トークンを発行する。createInquiryの直前に必ず呼ぶ。" +
+    "発行後に引数を変える場合は、このツールからやり直すこと。",
+  inputSchema: inquiryPayloadSchema,
+  execute: async (input) => ({
+    confirmationToken: signApprovalPayload({ action: "createInquiry", ...input }),
+    summary: `物件ID ${input.propertyId} に「${input.name}」名義で問い合わせを送信します`,
+  }),
+});
+
+export const createInquiry = tool({
+  description:
+    "物件への問い合わせを作成する（書き込み・要ユーザー承認）。" +
+    "prepareInquiryConfirmationで取得した確認トークンと、まったく同じ引数で呼ぶこと。",
+  inputSchema: inquiryPayloadSchema.extend({
+    confirmationToken: z.string().describe("prepareInquiryConfirmationが返したトークン"),
+  }),
+  execute: async ({ confirmationToken, ...input }) => {
+    const verdict = verifyApprovalPayload({ action: "createInquiry", ...input }, confirmationToken);
+    if (!verdict.ok) {
+      return { error: { code: "CONFIRMATION_MISMATCH", message: verdict.reason } };
+    }
+
+    try {
+      const inquiry = await realestateApiFetch<{ id: number; status: string }>(
+        `/properties/${input.propertyId}/inquiries`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: input.name,
+            email: input.email,
+            phone: input.phone,
+            message: input.message,
+          }),
+        },
+      );
+      return { inquiryId: inquiry.id, status: inquiry.status };
+    } catch (error) {
+      return toToolError(error);
+    }
+  },
+});
+
+export const prepareViewingConfirmation = tool({
+  description:
+    "内見予約の確認トークンを発行する。createViewingの直前に必ず呼ぶ。" +
+    "発行後に引数を変える場合は、このツールからやり直すこと。",
+  inputSchema: viewingPayloadSchema,
+  execute: async (input) => ({
+    confirmationToken: signApprovalPayload({ action: "createViewing", ...input }),
+    summary: `問い合わせID ${input.inquiryId} に ${input.scheduledAt} の内見予約を作成します`,
+  }),
+});
+
+export const createViewing = tool({
+  description:
+    "内見予約を作成する（書き込み・要ユーザー承認）。" +
+    "prepareViewingConfirmationで取得した確認トークンと、まったく同じ引数で呼ぶこと。",
+  inputSchema: viewingPayloadSchema.extend({
+    confirmationToken: z.string().describe("prepareViewingConfirmationが返したトークン"),
+  }),
+  execute: async ({ confirmationToken, ...input }) => {
+    const verdict = verifyApprovalPayload({ action: "createViewing", ...input }, confirmationToken);
+    if (!verdict.ok) {
+      return { error: { code: "CONFIRMATION_MISMATCH", message: verdict.reason } };
+    }
+
+    // JWTはこのサーバープロセス内でのみ取得・保持する（クライアントには一切渡さない）
+    const post = async () => {
+      const token = await getAgentAccessToken();
+      return realestateApiFetch<{ id: number; scheduledAt: string; status: string }>(
+        `/inquiries/${input.inquiryId}/viewings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ scheduledAt: input.scheduledAt }),
+        },
+      );
+    };
+
+    try {
+      let viewing;
+      try {
+        viewing = await post();
+      } catch (error) {
+        // キャッシュ済みトークンの失効を1回だけリカバリする
+        if (error instanceof RealestateApiError && error.status === 401) {
+          invalidateAgentToken();
+          viewing = await post();
+        } else {
+          throw error;
+        }
+      }
+      return { viewingId: viewing.id, scheduledAt: viewing.scheduledAt, status: viewing.status };
+    } catch (error) {
+      return toToolError(error);
+    }
+  },
+});
+
 export const agentTools = {
   searchProperties,
   getPropertyDetail,
   checkViewingAvailability,
+  prepareInquiryConfirmation,
+  createInquiry,
+  prepareViewingConfirmation,
+  createViewing,
 };
