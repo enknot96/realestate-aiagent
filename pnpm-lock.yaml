@@ -26,6 +26,9 @@ importers:
       ai:
         specifier: ^7.0.30
         version: 7.0.30(zod@4.4.3)
+      ai-fallback:
+        specifier: ^3.0.0
+        version: 3.0.0(@ai-sdk/provider-utils@5.0.10(zod@4.4.3))(@ai-sdk/provider@4.0.3)
       next:
         specifier: 16.2.10
         version: 16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1241,6 +1244,13 @@ packages:
     resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  ai-fallback@3.0.0:
+    resolution: {integrity: sha512-gWDUeKWT6ySREk7rpBkQUioxYI8pTbaCf//c9vpcBmSqtDsjKceOaccDO7jrSKtXgB9LEE0fd2H1K80zuLBNmQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@ai-sdk/provider': '>=4.0.0'
+      '@ai-sdk/provider-utils': '>=5.0.0'
 
   ai@7.0.2:
     resolution: {integrity: sha512-VMU08jHIDJnnKDrbC9AFa5ZsPpOTfAPRLvTRHtJk4FGAoeldmJROMxvZ2ak5lCjEJ2GP2OLPQbMRyEK8w0+S4A==}
@@ -4100,6 +4110,11 @@ snapshots:
       acorn: 8.17.0
 
   acorn@8.17.0: {}
+
+  ai-fallback@3.0.0(@ai-sdk/provider-utils@5.0.10(zod@4.4.3))(@ai-sdk/provider@4.0.3):
+    dependencies:
+      '@ai-sdk/provider': 4.0.3
+      '@ai-sdk/provider-utils': 5.0.10(zod@4.4.3)
 
   ai@7.0.2(zod@4.4.3):
     dependencies:

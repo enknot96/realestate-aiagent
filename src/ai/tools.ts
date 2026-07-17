@@ -21,7 +21,7 @@ type PropertyListResponse = {
 };
 
 // ツールのエラーは例外で握りつぶさず、構造化してAIに返す（AIが正直に報告・リカバリできるように）
-function toToolError(error: unknown) {
+export function toToolError(error: unknown) {
   if (error instanceof RealestateApiError) {
     return { error: { status: error.status, code: error.code, message: error.message } };
   }
