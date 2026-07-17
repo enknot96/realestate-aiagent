@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // 実モデルを叩くevalsは通常のテストから分離（pnpm test:evals で明示実行）
+    exclude: ["tests/evals/**", "**/node_modules/**"],
   },
   resolve: {
     alias: {
