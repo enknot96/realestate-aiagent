@@ -20,3 +20,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* チャット本文のMarkdown表示（react-markdown）向けの最小限のスタイル */
+.markdown-body {
+  /* 吹き出しのwhitespace-pre-wrapを打ち消す（Markdown側が改行を段落に変換するため） */
+  white-space: normal;
+}
+.markdown-body :is(p, ul, ol) {
+  margin-block: 0.4rem;
+}
+.markdown-body :is(ul, ol) {
+  padding-inline-start: 1.4rem;
+}
+.markdown-body ul {
+  list-style: disc;
+}
+.markdown-body ol {
+  list-style: decimal;
+}
+.markdown-body strong {
+  font-weight: 700;
+}
+.markdown-body :is(h1, h2, h3, h4) {
+  font-weight: 700;
+  margin-block: 0.6rem 0.3rem;
+}
