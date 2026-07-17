@@ -12,12 +12,8 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* UIは明色背景の吹き出しで組んでいるため、当面ライトテーマに固定する
+   （ダークモード対応はフェーズ5のUI作り込みで判断） */
 
 body {
   background: var(--background);

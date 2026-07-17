@@ -1,3 +1,5 @@
+import "server-only";
+
 // ④不動産業務管理APIのエラー形式（{"error":{"code","message",...}}）を保持する例外
 export class RealestateApiError extends Error {
   constructor(
