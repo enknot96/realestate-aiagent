@@ -3,22 +3,7 @@ import { z } from "zod";
 import { realestateApiFetch, RealestateApiError } from "@/lib/realestateApi";
 import { getAgentAccessToken, invalidateAgentToken } from "@/lib/agentAuth";
 import { signApprovalPayload, verifyApprovalPayload } from "@/lib/approvalSignature";
-
-type PropertyListResponse = {
-  properties: {
-    id: number;
-    type: "rent" | "sale";
-    title: string;
-    description: string | null;
-    price: number;
-    layout: string | null;
-    area: string | null;
-    address: string;
-  }[];
-  total: number;
-  limit: number;
-  offset: number;
-};
+import type { PropertyDetail, PropertyListResponse } from "@/lib/property";
 
 // ツールのエラーは例外で握りつぶさず、構造化してAIに返す（AIが正直に報告・リカバリできるように）
 export function toToolError(error: unknown) {
@@ -77,6 +62,7 @@ export const searchProperties = tool({
           layout: p.layout,
           area: p.area,
           address: p.address,
+          imageUrl: p.imageUrl ?? null,
           // 説明文はモデルのコンテキスト節約のため冒頭のみ渡す
           description: p.description ? p.description.slice(0, 100) : null,
         })),
@@ -86,18 +72,6 @@ export const searchProperties = tool({
     }
   },
 });
-
-type PropertyDetail = {
-  id: number;
-  type: "rent" | "sale";
-  title: string;
-  description: string | null;
-  price: number;
-  layout: string | null;
-  area: string | null;
-  address: string;
-  status: string;
-};
 
 export const getPropertyDetail = tool({
   description: "物件IDを指定して、物件の詳細情報（説明文の全文を含む）を取得する。",
@@ -116,6 +90,7 @@ export const getPropertyDetail = tool({
         layout: p.layout,
         area: p.area,
         address: p.address,
+        imageUrl: p.imageUrl ?? null,
       };
     } catch (error) {
       return toToolError(error);

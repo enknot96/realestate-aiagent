@@ -2,7 +2,8 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 // ── 承認カード ──────────────────────────────────────────────
@@ -210,6 +211,29 @@ function AvailabilitySlots({
   );
 }
 
+// 物件一覧/詳細ツールの出力から、詳細ページへのリンクチップを表示する
+// （サイトの物件ページとチャットをつなぐ導線。新しいタブで開き会話を保持する）
+type PropertyLinkItem = { id: number; title: string; price: number };
+
+function PropertyLinks({ properties }: { properties: PropertyLinkItem[] }) {
+  if (properties.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {properties.map((p) => (
+        <a
+          key={p.id}
+          href={`/properties/${p.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-xs text-gray-700 hover:bg-gray-50"
+        >
+          {p.title}（{p.price.toLocaleString()}円）↗
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: string) => void }) {
   const view = TOOL_VIEWS[part.type];
   const input = part.input ?? {};
@@ -265,6 +289,16 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
     part.state === "output-available" &&
     !output.error;
 
+  const showPropertyLinks =
+    part.state === "output-available" &&
+    !output.error &&
+    (part.type === "tool-searchProperties" || part.type === "tool-getPropertyDetail");
+  const propertyLinks: PropertyLinkItem[] = !showPropertyLinks
+    ? []
+    : part.type === "tool-searchProperties"
+      ? ((output.properties as PropertyLinkItem[] | undefined) ?? [])
+      : [{ id: Number(output.id), title: String(output.title), price: Number(output.price) }];
+
   return (
     <div className="my-0.5 text-sm">
       <p className={tone}>
@@ -274,18 +308,22 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
       {showSlots && (
         <AvailabilitySlots output={output as AvailabilityOutput} onPickSlot={onPickSlot} />
       )}
+      <PropertyLinks properties={propertyLinks} />
     </div>
   );
 }
 
 // ── ページ本体 ──────────────────────────────────────────────
 
-export default function Home() {
+function ChatApp() {
+  // 物件詳細ページの「AIエージェントに相談する」リンク（/?ask=...）からの
+  // プレフィルを受け取る。自動送信はせず、内容を確認してから送信してもらう
+  const searchParams = useSearchParams();
   const { messages, sendMessage, status, error, addToolApprovalResponse } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() => searchParams.get("ask") ?? "");
 
   const pickSlot = (label: string) => {
     if (status === "ready") {
@@ -370,5 +408,14 @@ export default function Home() {
         </button>
       </form>
     </main>
+  );
+}
+
+// useSearchParams()はSuspense境界の内側でのみ使える
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <ChatApp />
+    </Suspense>
   );
 }

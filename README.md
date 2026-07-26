@@ -1,9 +1,11 @@
 # 不動産AIエージェント
 
-自作の[不動産業務管理API（ポートフォリオ④）](https://github.com/YOUR-ACCOUNT/realestate-api)を「道具」として使い、物件探しから内見予約までをAIが多段のツール連鎖で進めるエージェントです。Next.js (App Router) + Vercel AI SDK v7 + Gemini で実装しています。
+自作の[不動産業務管理API（ポートフォリオ④）](https://github.com/enknot96/realestate-api)を「道具」として使い、物件探しから内見予約までをAIが多段のツール連鎖で進めるエージェントです。Next.js (App Router) + Vercel AI SDK v7 + Gemini で実装しています。
 
-- **デモ**: https://YOUR-DEPLOYMENT-URL.vercel.app （デプロイ後に差し替え）
-- **デモ動画**: （GIFをここに挿入）
+- **デモ**: https://realestate-aiagent.vercel.app
+- **デモ動画**:
+
+  ![デモ: 検索から内見予約承認までの一連の流れ](docs/demo.gif)
 
 > 🎬 **30秒で分かるこの作品**: 「予算8万円以内、ペット可の2LDKを探して」と話しかけると、AIが実際のAPIを検索し、0件なら自分の判断で条件を緩めて再検索し、内見の空き枠を確認し、ユーザーの承認を得てから本物のDBに予約を書き込みます。書き込み直前には、承認した内容とAPIに送られる内容の一致をHMAC署名で検証します。
 
@@ -119,7 +121,7 @@
 
 Vercel AI SDKのOpenTelemetryテレメトリをLangfuse Cloudに送り、モデル呼び出し・ツール実行・マルチステップの流れをトレースとして可視化しています。
 
-（Langfuseのトレース画面のスクリーンショットをここに挿入）
+![Langfuseのトレース画面: 多段ツール連鎖のツリー表示](docs/langfuse-trace.png)
 
 - Next.jsの計装フック（`src/instrumentation.ts`）で`LangfuseSpanProcessor`を登録
 - Vercelのサーバーレスではレスポンス送信後に関数が凍結されるため、`next/server`の`after()`で**応答完了後に`forceFlush()`** してトレース欠落を防いでいます
