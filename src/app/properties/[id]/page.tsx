@@ -24,7 +24,7 @@ export default async function PropertyDetailPage({
   const askText = `「${property.title}」について、内見の相談をしたいです`;
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-6">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
       <Link href="/properties" className="text-sm text-brand-teal">
         ← 物件一覧に戻る
       </Link>

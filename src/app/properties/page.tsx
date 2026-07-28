@@ -5,7 +5,7 @@ import { PropertyCard } from "@/components/property";
 import type { PropertyListResponse } from "@/lib/property";
 
 export const metadata: Metadata = {
-  title: "物件を探す | 不動産AIエージェント",
+  title: "物件を探す | みらい不動産",
 };
 
 const LIMIT = 20;
@@ -57,7 +57,7 @@ export default async function PropertiesPage({
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-6">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
       <h1 className="text-xl font-bold">物件を探す</h1>
 
       <form className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-3 text-sm">
@@ -121,14 +121,14 @@ export default async function PropertiesPage({
 
       <div className="flex justify-between text-sm">
         {hasPrev ? (
-          <Link href={pageHref(Math.max(0, offset - LIMIT))} className="text-blue-600">
+          <Link href={pageHref(Math.max(0, offset - LIMIT))} className="text-brand-teal">
             ← 前へ
           </Link>
         ) : (
           <span />
         )}
         {hasNext ? (
-          <Link href={pageHref(offset + LIMIT)} className="text-blue-600">
+          <Link href={pageHref(offset + LIMIT)} className="text-brand-teal">
             次へ →
           </Link>
         ) : (
