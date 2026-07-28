@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
+  { href: "/", label: "ホーム" },
   { href: "/properties", label: "物件を探す" },
-  { href: "/", label: "みらいくんに相談する" },
+  { href: "/chat", label: "みらいくんに相談する" },
 ];
 
 export function SiteNav() {

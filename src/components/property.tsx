@@ -54,7 +54,7 @@ export function PropertyCard({ property }: { property: PropertySummary }) {
       href={`/properties/${property.id}`}
       className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:shadow-md"
     >
-      <div className="aspect-[4/3] w-full">
+      <div className="aspect-[4/3] w-full overflow-hidden">
         <PropertyThumbnail property={property} />
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
