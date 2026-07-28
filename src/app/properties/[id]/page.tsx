@@ -61,7 +61,7 @@ export default async function PropertyDetailPage({
       )}
 
       <Link
-        href={`/?ask=${encodeURIComponent(askText)}`}
+        href={`/chat?ask=${encodeURIComponent(askText)}`}
         className="rounded-lg bg-brand-teal px-4 py-2 text-center text-sm font-bold text-white hover:bg-brand-navy"
       >
         この物件についてみらいくんに相談する

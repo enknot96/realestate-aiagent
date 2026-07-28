@@ -64,7 +64,7 @@ export default async function PropertiesPage({
         <select
           name="type"
           defaultValue={sp.type ?? ""}
-          className="rounded border border-gray-300 p-1.5"
+          className="min-w-[8rem] flex-1 rounded border border-gray-300 p-1.5"
         >
           <option value="">種別: 指定なし</option>
           <option value="rent">賃貸</option>
@@ -75,30 +75,33 @@ export default async function PropertiesPage({
           type="number"
           placeholder="下限価格"
           defaultValue={sp.minPrice}
-          className="w-28 rounded border border-gray-300 p-1.5"
+          className="min-w-[7rem] flex-1 rounded border border-gray-300 p-1.5"
         />
         <input
           name="maxPrice"
           type="number"
           placeholder="上限価格"
           defaultValue={sp.maxPrice}
-          className="w-28 rounded border border-gray-300 p-1.5"
+          className="min-w-[7rem] flex-1 rounded border border-gray-300 p-1.5"
         />
         <input
           name="layout"
           type="text"
           placeholder="間取り (例: 2LDK)"
           defaultValue={sp.layout}
-          className="w-32 rounded border border-gray-300 p-1.5"
+          className="min-w-[8rem] flex-1 rounded border border-gray-300 p-1.5"
         />
         <input
           name="keyword"
           type="text"
           placeholder="キーワード (例: ペット可)"
           defaultValue={sp.keyword}
-          className="w-40 rounded border border-gray-300 p-1.5"
+          className="min-w-[9rem] flex-1 rounded border border-gray-300 p-1.5"
         />
-        <button type="submit" className="rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy">
+        <button
+          type="submit"
+          className="shrink-0 rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
+        >
           検索
         </button>
       </form>
