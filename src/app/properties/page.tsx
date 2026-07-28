@@ -98,7 +98,7 @@ export default async function PropertiesPage({
           defaultValue={sp.keyword}
           className="w-40 rounded border border-gray-300 p-1.5"
         />
-        <button type="submit" className="rounded bg-blue-600 px-4 py-1.5 text-white">
+        <button type="submit" className="rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy">
           検索
         </button>
       </form>
@@ -112,7 +112,7 @@ export default async function PropertiesPage({
           条件に一致する物件が見つかりませんでした。AIエージェントに相談すると、条件を緩めた提案がもらえます。
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {data.properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}

@@ -25,7 +25,7 @@ export default async function PropertyDetailPage({
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-6">
-      <Link href="/properties" className="text-sm text-blue-600">
+      <Link href="/properties" className="text-sm text-brand-teal">
         ← 物件一覧に戻る
       </Link>
 
@@ -36,7 +36,7 @@ export default async function PropertyDetailPage({
       <div>
         <span className="text-xs text-gray-500">{PROPERTY_TYPE_LABEL[property.type]}</span>
         <h1 className="text-xl font-bold">{property.title}</h1>
-        <p className="mt-1 text-2xl font-bold text-blue-700">{formatPrice(property.price)}</p>
+        <p className="mt-1 text-2xl font-bold text-brand-teal">{formatPrice(property.price)}</p>
       </div>
 
       <dl className="grid grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-white p-4 text-sm sm:grid-cols-4">
@@ -62,9 +62,9 @@ export default async function PropertyDetailPage({
 
       <Link
         href={`/?ask=${encodeURIComponent(askText)}`}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-bold text-white"
+        className="rounded-lg bg-brand-teal px-4 py-2 text-center text-sm font-bold text-white hover:bg-brand-navy"
       >
-        この物件についてAIエージェントに相談する
+        この物件についてみらいくんに相談する
       </Link>
     </main>
   );
