@@ -48,6 +48,9 @@ export default function RootLayout({
           </div>
         </header>
         <div className="flex flex-1 flex-col">{children}</div>
+        <footer className="border-t border-gray-200 bg-white py-4 text-center text-xs text-gray-500">
+          © {new Date().getFullYear()} みらい不動産株式会社
+        </footer>
       </body>
     </html>
   );
