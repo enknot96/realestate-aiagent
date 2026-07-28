@@ -329,7 +329,7 @@ function UserAvatar() {
 function AssistantAvatar() {
   return (
     <Image
-      src="/miraikun.jpg"
+      src="/miraikun.png"
       alt="みらいくん"
       width={32}
       height={32}
@@ -377,7 +377,7 @@ function ChatApp() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 p-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-6">
       <h1 className="text-xl font-bold">みらいくんに相談する</h1>
 
       <div className="flex flex-1 flex-col gap-3">

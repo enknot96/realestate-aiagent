@@ -33,16 +33,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <header className="border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-4xl items-center gap-6 px-6 py-3">
-            <Link href="/" className="flex items-center gap-2">
+          <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-2">
+            <Link href="/" className="flex items-center">
               <Image
-                src="/logo.jpg"
+                src="/logo-full.png"
                 alt="みらい不動産"
-                width={28}
-                height={28}
-                className="rounded"
+                width={1024}
+                height={350}
+                className="h-20 w-auto"
+                priority
               />
-              <span className="font-bold">みらい不動産</span>
             </Link>
             <SiteNav />
           </div>
