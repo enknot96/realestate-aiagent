@@ -2,8 +2,9 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useEffectEvent, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 // ── 承認カード ──────────────────────────────────────────────
@@ -85,7 +86,7 @@ function ApprovalCard({
       <div className="flex gap-2">
         <button
           type="button"
-          className="rounded-lg bg-blue-600 px-4 py-1.5 text-white"
+          className="rounded-lg bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
           onClick={() => onRespond(true)}
         >
           承認する
@@ -196,7 +197,7 @@ function AvailabilitySlots({
               <button
                 key={startAt}
                 type="button"
-                className="rounded-full border border-blue-300 bg-white px-2.5 py-0.5 text-xs text-blue-700 hover:bg-blue-50"
+                className="rounded-full border border-brand-teal/40 bg-white px-2.5 py-0.5 text-xs text-brand-teal hover:bg-brand-teal/10"
                 onClick={() =>
                   onPickSlot(`${jstDate.format(new Date(startAt))} ${time} で内見を希望します`)
                 }
@@ -313,6 +314,30 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
   );
 }
 
+// ── アバター ──────────────────────────────────────────────
+
+function UserAvatar() {
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-300 text-gray-600">
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+        <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.418 0-8 2.239-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.761-3.582-5-8-5Z" />
+      </svg>
+    </div>
+  );
+}
+
+function AssistantAvatar() {
+  return (
+    <Image
+      src="/miraikun.jpg"
+      alt="みらいくん"
+      width={32}
+      height={32}
+      className="h-8 w-8 shrink-0 rounded-full object-cover"
+    />
+  );
+}
+
 // ── ページ本体 ──────────────────────────────────────────────
 
 function ChatApp() {
@@ -325,6 +350,26 @@ function ChatApp() {
   });
   const [input, setInput] = useState(() => searchParams.get("ask") ?? "");
 
+  // メッセージごとの表示時刻をidで記憶する（ストリーミング中の再レンダリングでも初回時刻を保持）
+  const [timestamps, setTimestamps] = useState<Record<string, number>>({});
+  const recordNewTimestamps = useEffectEvent(() => {
+    setTimestamps((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const message of messages) {
+        if (!(message.id in next)) {
+          next[message.id] = Date.now();
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  });
+  useEffect(() => {
+    const id = setTimeout(recordNewTimestamps, 0);
+    return () => clearTimeout(id);
+  }, [messages]);
+
   const pickSlot = (label: string) => {
     if (status === "ready") {
       sendMessage({ text: label });
@@ -333,43 +378,58 @@ function ChatApp() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 p-6">
-      <h1 className="text-xl font-bold">不動産AIエージェント</h1>
+      <h1 className="text-xl font-bold">みらいくんに相談する</h1>
 
       <div className="flex flex-1 flex-col gap-3">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`whitespace-pre-wrap rounded-lg p-3 text-sm ${
-              message.role === "user" ? "self-end bg-blue-100" : "w-full self-start bg-gray-100"
-            }`}
-          >
-            {message.parts.map((part, index) => {
-              if (part.type === "text") {
-                return (
-                  <div key={index} className="markdown-body">
-                    <ReactMarkdown>{part.text}</ReactMarkdown>
-                  </div>
-                );
-              }
-              if (isToolPart(part)) {
-                if (isApprovalRequested(part)) {
-                  return (
-                    <ApprovalCard
-                      key={index}
-                      part={part}
-                      onRespond={(approved) =>
-                        addToolApprovalResponse({ id: part.approval.id, approved })
+        {messages.map((message) => {
+          const isUser = message.role === "user";
+          return (
+            <div
+              key={message.id}
+              className={`flex max-w-[85%] gap-2 ${
+                isUser ? "flex-row-reverse self-end" : "w-full self-start"
+              }`}
+            >
+              {isUser ? <UserAvatar /> : <AssistantAvatar />}
+              <div className={`flex min-w-0 flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
+                <div
+                  className={`whitespace-pre-wrap rounded-lg p-3 text-sm ${
+                    isUser ? "bg-brand-teal/10" : "w-full bg-gray-100"
+                  }`}
+                >
+                  {message.parts.map((part, index) => {
+                    if (part.type === "text") {
+                      return (
+                        <div key={index} className="markdown-body">
+                          <ReactMarkdown>{part.text}</ReactMarkdown>
+                        </div>
+                      );
+                    }
+                    if (isToolPart(part)) {
+                      if (isApprovalRequested(part)) {
+                        return (
+                          <ApprovalCard
+                            key={index}
+                            part={part}
+                            onRespond={(approved) =>
+                              addToolApprovalResponse({ id: part.approval.id, approved })
+                            }
+                          />
+                        );
                       }
-                    />
-                  );
-                }
-                return <ToolStep key={index} part={part} onPickSlot={pickSlot} />;
-              }
-              // step-start等の内部イベントは表示しない
-              return null;
-            })}
-          </div>
-        ))}
+                      return <ToolStep key={index} part={part} onPickSlot={pickSlot} />;
+                    }
+                    // step-start等の内部イベントは表示しない
+                    return null;
+                  })}
+                </div>
+                <span className="text-[11px] text-gray-400">
+                  {timestamps[message.id] ? jstTime.format(new Date(timestamps[message.id])) : ""}
+                </span>
+              </div>
+            </div>
+          );
+        })}
         {status === "submitted" && (
           <p className="self-start text-sm text-gray-400">考えています…</p>
         )}
@@ -393,7 +453,7 @@ function ChatApp() {
         }}
       >
         <input
-          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm"
+          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm focus:border-brand-teal focus:outline-none"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={status !== "ready"}
@@ -401,7 +461,7 @@ function ChatApp() {
         />
         <button
           type="submit"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-brand-teal px-4 py-2 text-sm text-white hover:bg-brand-navy disabled:opacity-50"
           disabled={status !== "ready"}
         >
           送信

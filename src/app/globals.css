@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* ロゴ(logo02.jpeg)のブルー→グリーンから採取したブランドカラー */
+  --brand-navy: #163a5c;
+  --brand-teal: #0f6e8c;
+  --brand-mint: #6fd08c;
 }
 
 @theme inline {
@@ -10,10 +15,28 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-mint: var(--brand-mint);
+
+  /* 物件カードグリッド用の追加ブレークポイント（狭いスマホ幅向け） */
+  --breakpoint-xs: 30rem;
 }
 
 /* UIは明色背景の吹き出しで組んでいるため、当面ライトテーマに固定する
-   （ダークモード対応はフェーズ5のUI作り込みで判断） */
+   （ダークモード対応は現時点では非対象。将来の判断事項） */
+
+.brand-gradient {
+  background-image: linear-gradient(90deg, var(--brand-navy), var(--brand-teal) 55%, var(--brand-mint));
+}
+
+.brand-gradient-text {
+  background-image: linear-gradient(90deg, var(--brand-navy), var(--brand-teal) 55%, var(--brand-mint));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
 
 body {
   background: var(--background);

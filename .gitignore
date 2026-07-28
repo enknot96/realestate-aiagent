@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+不動産AIエージェント_実装手順書.md
+理解用.md
+docs
