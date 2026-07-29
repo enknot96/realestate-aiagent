@@ -3,6 +3,40 @@ import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
 import type { PropertyListResponse } from "@/lib/property";
 
+function SearchIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function StarIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.2 21 12 17.27 5.8 21 7 14.14l-5-4.87 7.1-1.01L12 2z" />
+    </svg>
+  );
+}
+
+function BellIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 // 今回はCMS等を持たないため、ダミーの固定文言を表示する（今後のタスクで見直し予定）
 const NEWS_ITEMS = [
   { date: "2026.07.20", text: "AIエージェント「みらいくん」がオンライン内見予約に対応しました。" },
@@ -30,21 +64,31 @@ export default async function HomePage() {
         style={{ backgroundImage: "url(/home-hero.jpeg)" }}
       >
         {/* 背景画像が未配置の間もbrand-gradient相当の見た目になる半透明グラデーション */}
-        <div className="brand-gradient-overlay absolute inset-0" aria-hidden="true" />
+        <div
+          className="brand-gradient-overlay absolute inset-0"
+          aria-hidden="true"
+        />
         <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-4">
-          <h1 className="text-2xl font-bold sm:text-4xl">
-            あなたの「これから」を、新しい住まいから。
-          </h1>
+          <h1 className="text-3xl font-bold sm:text-5xl">探すから、 話せるへ。</h1>
           <p className="text-sm text-white/90 sm:text-base">
-            物件を自分で探すか、AIエージェント「みらいくん」に任せるか。両方できる不動産サイト、みらい不動産。
+            AIエージェント「みらいくん」との会話で、
+            <br />
+            あなたにぴったりの住まいが見つかります。
           </p>
         </div>
       </section>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-24 px-6 pt-6 pb-24">
         <section className="-mt-12 rounded-lg border border-gray-200 bg-white p-4 shadow-md sm:-mt-16">
-          <h2 className="mb-3 text-sm font-bold text-gray-700">物件を探す</h2>
-          <form action="/properties" method="get" className="flex flex-wrap gap-2 text-sm">
+          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-gray-700">
+            <SearchIcon className="h-4 w-4 text-brand-teal" />
+            物件を探す
+          </h2>
+          <form
+            action="/properties"
+            method="get"
+            className="flex flex-wrap gap-2 text-sm"
+          >
             <select
               name="type"
               defaultValue=""
@@ -80,7 +124,7 @@ export default async function HomePage() {
             />
             <button
               type="submit"
-              className="shrink-0 rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
+              className="shrink-0 cursor-pointer rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
             >
               検索
             </button>
@@ -90,24 +134,40 @@ export default async function HomePage() {
         {recommended.length > 0 && (
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold">おすすめ物件ピックアップ</h2>
-              <Link href="/properties" className="text-sm text-brand-teal">
-                物件を探す →
+              <h2 className="flex items-center gap-2 text-lg font-bold">
+                <StarIcon className="h-5 w-5 text-brand-teal" />
+                おすすめ物件ピックアップ
+              </h2>
+              <Link
+                href="/properties"
+                className="group flex items-center gap-1 text-sm font-bold text-brand-teal hover:text-brand-navy"
+              >
+                物件を探す
+                <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
             <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {recommended.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                />
               ))}
             </div>
           </section>
         )}
 
         <section>
-          <h2 className="mb-3 text-lg font-bold">お知らせ・トピックス</h2>
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-bold">
+            <BellIcon className="h-5 w-5 text-brand-teal" />
+            お知らせ・トピックス
+          </h2>
           <ul className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
             {NEWS_ITEMS.map((item) => (
-              <li key={item.date} className="flex flex-col gap-1 p-3 text-sm sm:flex-row sm:gap-4">
+              <li
+                key={item.date}
+                className="flex flex-col gap-1 p-3 text-sm sm:flex-row sm:gap-4"
+              >
                 <span className="shrink-0 text-gray-500">{item.date}</span>
                 <span>{item.text}</span>
               </li>
