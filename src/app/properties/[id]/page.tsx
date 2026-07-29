@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { realestateApiFetch, RealestateApiError } from "@/lib/realestateApi";
@@ -67,8 +68,15 @@ export default async function PropertyDetailPage({
 
       <Link
         href={`/chat?ask=${encodeURIComponent(askText)}`}
-        className="rounded-lg bg-brand-teal px-4 py-2 text-center text-sm font-bold text-white hover:bg-brand-navy"
+        className="flex items-center justify-center gap-2 rounded-lg bg-brand-teal px-4 py-4 text-center text-sm font-bold text-white hover:bg-brand-navy max-[424px]:text-[14px]"
       >
+        <Image
+          src="/miraikun.png"
+          alt=""
+          width={24}
+          height={24}
+          className="h-6 w-6 shrink-0 rounded-full object-cover"
+        />
         この物件についてみらいくんに相談する
       </Link>
     </main>

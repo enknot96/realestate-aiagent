@@ -69,6 +69,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* チャット: 新規メッセージのフェードイン＋スライドイン */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+/* チャット: 「考えています…」のタイピングドット */
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.animate-typing-dot {
+  animation: typing-dot 1.1s ease-in-out infinite;
+}
+
 /* チャット本文のMarkdown表示（react-markdown）向けの最小限のスタイル */
 .markdown-body {
   /* 吹き出しのwhitespace-pre-wrapを打ち消す（Markdown側が改行を段落に変換するため） */
