@@ -4,8 +4,16 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useEffectEvent, useState } from "react";
+import { Suspense, useEffect, useEffectEvent, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import {
+  CheckIcon,
+  ClockIcon,
+  ExclamationIcon,
+  PauseIcon,
+  SendIcon,
+  XCircleIcon,
+} from "@/components/icons";
 
 // ── 承認カード ──────────────────────────────────────────────
 
@@ -86,14 +94,14 @@ function ApprovalCard({
       <div className="flex gap-2">
         <button
           type="button"
-          className="rounded-lg bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
+          className="cursor-pointer rounded-lg bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
           onClick={() => onRespond(true)}
         >
           承認する
         </button>
         <button
           type="button"
-          className="rounded-lg border border-gray-300 px-4 py-1.5"
+          className="cursor-pointer rounded-lg border border-gray-300 px-4 py-1.5"
           onClick={() => onRespond(false)}
         >
           拒否する
@@ -185,27 +193,29 @@ function AvailabilitySlots({
     return <p className="mt-1 text-xs text-gray-500">この期間に空き枠はありません</p>;
   }
   return (
-    <div className="mt-2 space-y-2">
+    <div className="mt-3 space-y-5">
       {days.map((day) => (
-        <div key={day.date} className="flex flex-wrap items-center gap-1.5">
-          <span className="w-24 shrink-0 text-xs font-medium text-gray-600">
+        <div key={day.date}>
+          <p className="mb-2 text-xs font-bold text-gray-600">
             {jstDate.format(new Date(`${day.date}T00:00:00+09:00`))}
-          </span>
-          {day.availableStartAts.map((startAt) => {
-            const time = jstTime.format(new Date(startAt));
-            return (
-              <button
-                key={startAt}
-                type="button"
-                className="rounded-full border border-brand-teal/40 bg-white px-2.5 py-0.5 text-xs text-brand-teal hover:bg-brand-teal/10"
-                onClick={() =>
-                  onPickSlot(`${jstDate.format(new Date(startAt))} ${time} で内見を希望します`)
-                }
-              >
-                {time}
-              </button>
-            );
-          })}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {day.availableStartAts.map((startAt) => {
+              const time = jstTime.format(new Date(startAt));
+              return (
+                <button
+                  key={startAt}
+                  type="button"
+                  className="cursor-pointer rounded-full border border-brand-teal/40 bg-white px-3.5 py-2 text-xs text-brand-teal hover:bg-brand-teal/10"
+                  onClick={() =>
+                    onPickSlot(`${jstDate.format(new Date(startAt))} ${time} で内見を希望します`)
+                  }
+                >
+                  {time}
+                </button>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>
@@ -219,7 +229,7 @@ type PropertyLinkItem = { id: number; title: string; price: number };
 function PropertyLinks({ properties }: { properties: PropertyLinkItem[] }) {
   if (properties.length === 0) return null;
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
+    <div className="mt-3 flex flex-wrap gap-1.5">
       {properties.map((p) => (
         <a
           key={p.id}
@@ -241,7 +251,8 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
   const output = (part.output ?? {}) as Record<string, unknown>;
   const label = part.type.replace("tool-", "");
 
-  let icon = "⏳";
+  let icon = <ClockIcon className="h-2.5 w-2.5" />;
+  let badgeTone = "bg-gray-200 text-gray-500";
   let text = view ? view.running(input) : `${label} を実行中…`;
   let tone = "text-gray-500";
 
@@ -249,38 +260,43 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
     case "output-available":
       if (output.error) {
         const err = output.error as { message?: string };
-        icon = "⚠️";
+        icon = <ExclamationIcon className="h-2.5 w-2.5" />;
+        badgeTone = "bg-red-100 text-red-600";
         text = `${label}: 実行できませんでした — ${err.message ?? "不明なエラー"}`;
         tone = "text-red-600";
       } else {
-        icon = "✅";
+        icon = <CheckIcon className="h-2.5 w-2.5" />;
+        badgeTone = "bg-brand-teal/15 text-brand-teal";
         text = view ? view.done(input, output) : `${label} が完了しました`;
         tone = "text-gray-700";
       }
       break;
     case "output-error":
-      icon = "⚠️";
+      icon = <ExclamationIcon className="h-2.5 w-2.5" />;
+      badgeTone = "bg-red-100 text-red-600";
       text = `${label} の実行でエラーが発生しました`;
       tone = "text-red-600";
       break;
     case "output-denied":
-      icon = "🚫";
+      icon = <XCircleIcon className="h-2.5 w-2.5" />;
+      badgeTone = "bg-gray-200 text-gray-500";
       text = `${TOOL_TITLES[part.type] ?? label} — 実行をキャンセルしました（拒否）`;
       tone = "text-gray-500";
       break;
     case "approval-responded":
       if (part.approval?.approved === false) {
-        icon = "🚫";
+        icon = <XCircleIcon className="h-2.5 w-2.5" />;
+        badgeTone = "bg-gray-200 text-gray-500";
         text = `${TOOL_TITLES[part.type] ?? label} — キャンセルを送信しました`;
         tone = "text-gray-500";
       } else {
-        icon = "⏳";
+        icon = <ClockIcon className="h-2.5 w-2.5" />;
         text = "承認を受け付けました。実行中…";
       }
       break;
     case "approval-requested":
       // 通常はApprovalCardが表示される。approval IDが取れない異常時のフォールバック
-      icon = "⏸";
+      icon = <PauseIcon className="h-2.5 w-2.5" />;
       text = `${TOOL_TITLES[part.type] ?? label} — 承認待ちです`;
       break;
   }
@@ -302,8 +318,12 @@ function ToolStep({ part, onPickSlot }: { part: ToolPart; onPickSlot: (label: st
 
   return (
     <div className="my-0.5 text-sm">
-      <p className={tone}>
-        <span className="mr-1">{icon}</span>
+      <p className={`flex items-center gap-1.5 ${tone}`}>
+        <span
+          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${badgeTone}`}
+        >
+          {icon}
+        </span>
         {text}
       </p>
       {showSlots && (
@@ -338,6 +358,37 @@ function AssistantAvatar() {
   );
 }
 
+// ── 空の状態（ウェルカムメッセージ） ────────────────────────
+
+function WelcomeMessage() {
+  return (
+    <div className="flex w-full max-w-[85%] animate-fade-in-up gap-2 self-start">
+      <AssistantAvatar />
+      <div className="flex min-w-0 flex-col items-start gap-1">
+        <div className="w-full rounded-lg bg-gray-100 p-3 text-sm">
+          こんにちは！みらいくんです。お住まい探しのご希望や気になることを、お気軽にメッセージしてくださいね。
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── タイピングインジケーター ─────────────────────────────────
+
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1.5 self-start rounded-lg bg-gray-100 px-4 py-3">
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="h-2 w-2 animate-typing-dot rounded-full bg-gray-400"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── ページ本体 ──────────────────────────────────────────────
 
 function ChatApp() {
@@ -349,6 +400,16 @@ function ChatApp() {
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
   const [input, setInput] = useState(() => searchParams.get("ask") ?? "");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // textareaの高さをコンテンツに合わせて自動調整する（最大160pxまで、以降はスクロール）
+  function resizeTextarea(el: HTMLTextAreaElement) {
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }
+  useEffect(() => {
+    if (textareaRef.current) resizeTextarea(textareaRef.current);
+  }, []);
 
   // メッセージごとの表示時刻をidで記憶する（ストリーミング中の再レンダリングでも初回時刻を保持）
   const [timestamps, setTimestamps] = useState<Record<string, number>>({});
@@ -376,17 +437,40 @@ function ChatApp() {
     }
   };
 
-  return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 p-6">
-      <h1 className="text-xl font-bold">みらいくんに相談する</h1>
+  const submitMessage = () => {
+    if (input.trim() && status === "ready") {
+      sendMessage({ text: input });
+      setInput("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+    }
+  };
 
-      <div className="flex flex-1 flex-col gap-3">
+  return (
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 bg-gray-50 p-6">
+      <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <Image
+          src="/miraikun.png"
+          alt="みらいくん"
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 rounded-full object-cover"
+        />
+        <div>
+          <p className="font-bold">みらいくん</p>
+          <p className="text-xs text-gray-500">住まい探しのご相談、お気軽にどうぞ</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        {messages.length === 0 && <WelcomeMessage />}
         {messages.map((message) => {
           const isUser = message.role === "user";
           return (
             <div
               key={message.id}
-              className={`flex max-w-[85%] gap-2 ${
+              className={`flex max-w-[85%] animate-fade-in-up gap-2 ${
                 isUser ? "flex-row-reverse self-end" : "w-full self-start"
               }`}
             >
@@ -430,9 +514,7 @@ function ChatApp() {
             </div>
           );
         })}
-        {status === "submitted" && (
-          <p className="self-start text-sm text-gray-400">考えています…</p>
-        )}
+        {status === "submitted" && <TypingIndicator />}
         {error && (
           <div className="self-start rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
             {error.message && error.message !== "An error occurred."
@@ -443,28 +525,37 @@ function ChatApp() {
       </div>
 
       <form
-        className="flex gap-2"
+        className="flex items-end gap-2"
         onSubmit={(e) => {
           e.preventDefault();
-          if (input.trim()) {
-            sendMessage({ text: input });
-            setInput("");
-          }
+          submitMessage();
         }}
       >
-        <input
-          className="flex-1 rounded-lg border border-gray-300 p-2 text-sm focus:border-brand-teal focus:outline-none"
+        <textarea
+          ref={textareaRef}
+          rows={1}
+          className="max-h-40 flex-1 resize-none rounded-lg border border-gray-300 p-2 text-sm focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/30 focus:outline-none"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            resizeTextarea(e.target);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submitMessage();
+            }
+          }}
           disabled={status !== "ready"}
-          placeholder="メッセージを入力…"
+          placeholder="メッセージを入力…（Shift+Enterで改行）"
         />
         <button
           type="submit"
-          className="rounded-lg bg-brand-teal px-4 py-2 text-sm text-white hover:bg-brand-navy disabled:opacity-50"
-          disabled={status !== "ready"}
+          aria-label="送信"
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-teal text-white transition-colors hover:bg-brand-navy disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={status !== "ready" || !input.trim()}
         >
-          送信
+          <SendIcon className="h-5 w-5" />
         </button>
       </form>
     </main>
