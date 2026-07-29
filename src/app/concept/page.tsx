@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PersonIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "みらい不動産について | みらい不動産",
@@ -35,18 +36,24 @@ export default function ConceptPage() {
           ))}
         </div>
 
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm sm:flex-row sm:text-left">
-          <div
-            className="h-24 w-24 shrink-0 rounded-full bg-gray-200 bg-cover bg-center"
-            style={{ backgroundImage: "url(/concept-founder.jpeg)" }}
-            role="img"
-            aria-label="代表取締役 未来 拓也"
-          />
-          <div>
-            <p className="font-bold">代表取締役 未来 拓也</p>
-            <p className="mt-1 text-sm text-gray-600">
-              テクノロジーの力で、住まい探しをもっとワクワクするものに。
-            </p>
+        <div>
+          <h2 className="mb-3 flex items-center justify-center gap-2 text-lg font-bold sm:justify-start">
+            <PersonIcon className="h-5 w-5 text-brand-teal" />
+            代表からのメッセージ
+          </h2>
+          <div className="flex flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm transition-shadow duration-200 hover:shadow-md sm:flex-row sm:text-left">
+            <div
+              className="h-24 w-24 shrink-0 rounded-full bg-gray-200 bg-cover bg-center"
+              style={{ backgroundImage: "url(/concept-founder.jpeg)" }}
+              role="img"
+              aria-label="代表取締役 未来 拓也"
+            />
+            <div>
+              <p className="font-bold">代表取締役 未来 拓也</p>
+              <p className="mt-1 text-sm text-gray-600">
+                テクノロジーの力で、住まい探しをもっとワクワクするものに。
+              </p>
+            </div>
           </div>
         </div>
       </div>

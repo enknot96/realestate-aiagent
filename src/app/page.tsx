@@ -1,41 +1,8 @@
 import Link from "next/link";
 import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
+import { ArrowRightIcon, BellIcon, SearchIcon, StarIcon } from "@/components/icons";
 import type { PropertyListResponse } from "@/lib/property";
-
-function SearchIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
-      <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function StarIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.2 21 12 17.27 5.8 21 7 14.14l-5-4.87 7.1-1.01L12 2z" />
-    </svg>
-  );
-}
-
-function BellIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
-      <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ArrowRightIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
-      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 // 今回はCMS等を持たないため、ダミーの固定文言を表示する（今後のタスクで見直し予定）
 const NEWS_ITEMS = [

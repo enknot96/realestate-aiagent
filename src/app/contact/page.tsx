@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
+import { CalendarIcon, ChatBubbleIcon, MailIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "お問い合わせ | みらい不動産",
@@ -21,13 +22,19 @@ export default function ContactPage() {
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 p-6 py-12">
         <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-bold">フォームでのお問い合わせ</h2>
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+            <MailIcon className="h-5 w-5 text-brand-teal" />
+            フォームでのお問い合わせ
+          </h2>
           <ContactForm />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <h2 className="text-sm font-bold text-gray-700">オンライン相談予約</h2>
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
+              <CalendarIcon className="h-4 w-4 text-brand-teal" />
+              オンライン相談予約
+            </h2>
             <p className="text-xs text-gray-500">Zoom / Google Meetでの相談予約（近日公開）</p>
             <button
               type="button"
@@ -39,7 +46,10 @@ export default function ContactPage() {
           </div>
 
           <div className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <h2 className="text-sm font-bold text-gray-700">LINEでお気軽に相談</h2>
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
+              <ChatBubbleIcon className="h-4 w-4 text-brand-teal" />
+              LINEでお気軽に相談
+            </h2>
             <div className="flex h-28 w-28 flex-col items-center justify-center gap-0.5 rounded bg-gray-100 text-xs text-gray-400">
               <span>QRコード</span>
               <span>準備中</span>
