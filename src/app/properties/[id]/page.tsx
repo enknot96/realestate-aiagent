@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { realestateApiFetch, RealestateApiError } from "@/lib/realestateApi";
 import { PropertyThumbnail } from "@/components/property";
+import { ArrowLeftIcon } from "@/components/icons";
 import { formatPrice, PROPERTY_TYPE_LABEL, type PropertyDetail } from "@/lib/property";
 
 export default async function PropertyDetailPage({
@@ -25,8 +26,12 @@ export default async function PropertyDetailPage({
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
-      <Link href="/properties" className="text-sm text-brand-teal">
-        ← 物件一覧に戻る
+      <Link
+        href="/properties"
+        className="group flex w-fit items-center gap-1 text-sm font-bold text-brand-teal hover:text-brand-navy"
+      >
+        <ArrowLeftIcon className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+        物件一覧に戻る
       </Link>
 
       <div className="aspect-[16/9] w-full overflow-hidden rounded-lg">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
+import { ArrowLeftIcon, ArrowRightIcon, SearchIcon } from "@/components/icons";
 import type { PropertyListResponse } from "@/lib/property";
 
 export const metadata: Metadata = {
@@ -58,7 +59,10 @@ export default async function PropertiesPage({
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
-      <h1 className="text-xl font-bold">物件を探す</h1>
+      <h1 className="flex items-center gap-2 text-xl font-bold">
+        <SearchIcon className="h-5 w-5 text-brand-teal" />
+        物件を探す
+      </h1>
 
       <form className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-3 text-sm">
         <select
@@ -100,7 +104,7 @@ export default async function PropertiesPage({
         />
         <button
           type="submit"
-          className="shrink-0 rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
+          className="shrink-0 cursor-pointer rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
         >
           検索
         </button>
@@ -124,15 +128,23 @@ export default async function PropertiesPage({
 
       <div className="flex justify-between text-sm">
         {hasPrev ? (
-          <Link href={pageHref(Math.max(0, offset - LIMIT))} className="text-brand-teal">
-            ← 前へ
+          <Link
+            href={pageHref(Math.max(0, offset - LIMIT))}
+            className="group flex items-center gap-1 font-bold text-brand-teal hover:text-brand-navy"
+          >
+            <ArrowLeftIcon className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+            前へ
           </Link>
         ) : (
           <span />
         )}
         {hasNext ? (
-          <Link href={pageHref(offset + LIMIT)} className="text-brand-teal">
-            次へ →
+          <Link
+            href={pageHref(offset + LIMIT)}
+            className="group flex items-center gap-1 font-bold text-brand-teal hover:text-brand-navy"
+          >
+            次へ
+            <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         ) : (
           <span />

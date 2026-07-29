@@ -53,7 +53,7 @@ export function ContactForm() {
       </label>
       <button
         type="submit"
-        className="rounded-lg bg-brand-teal px-4 py-2 font-bold text-white hover:bg-brand-navy"
+        className="cursor-pointer rounded-lg bg-brand-teal px-4 py-2 font-bold text-white hover:bg-brand-navy"
       >
         送信する
       </button>
