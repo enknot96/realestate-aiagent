@@ -41,7 +41,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10 p-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-24 px-6 pt-6 pb-24">
         <section className="-mt-12 rounded-lg border border-gray-200 bg-white p-4 shadow-md sm:-mt-16">
           <h2 className="mb-3 text-sm font-bold text-gray-700">物件を探す</h2>
           <form action="/properties" method="get" className="flex flex-wrap gap-2 text-sm">
