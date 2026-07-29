@@ -31,7 +31,7 @@ function NavLink({
       href={href}
       onClick={onClick}
       aria-current={active ? "page" : undefined}
-      className={`relative w-fit py-1 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-teal after:transition-transform after:duration-300 after:content-[''] ${
+      className={`relative w-fit py-3 after:absolute after:bottom-1 after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-brand-teal after:transition-transform after:duration-300 after:content-[''] ${
         active
           ? "font-bold text-brand-teal after:scale-x-100"
           : "text-gray-600 after:scale-x-0 hover:text-brand-teal hover:after:scale-x-100"
@@ -48,7 +48,7 @@ function ChatLink({ active, onClick }: { active: boolean; onClick?: () => void }
       href={CHAT_ITEM.href}
       onClick={onClick}
       aria-current={active ? "page" : undefined}
-      className={`flex w-fit items-center gap-1.5 rounded-lg border px-3 py-1.5 transition-colors ${
+      className={`flex w-fit items-center gap-1.5 rounded-lg border px-3 py-3 transition-colors ${
         active
           ? "border-brand-teal bg-brand-teal/10 font-bold text-brand-teal"
           : "border-gray-300 text-gray-600 hover:border-brand-teal hover:text-brand-teal"
@@ -59,10 +59,38 @@ function ChatLink({ active, onClick }: { active: boolean; onClick?: () => void }
         alt=""
         width={20}
         height={20}
-        className="h-5 w-5 rounded-full object-cover"
+        className="h-10 w-10 rounded-full object-cover"
       />
       {CHAT_ITEM.label}
     </Link>
+  );
+}
+
+// 3本線↔️✕のモーフィングアニメーション。中央の線はopacityで消し、上下の線は
+// 中央に集めてから回転させることでクロスフェード感のない滑らかなXになる
+function HamburgerIcon({ open }: { open: boolean }) {
+  return (
+    <span
+      className="relative block h-4 w-5"
+      aria-hidden="true"
+    >
+      <span
+        className="absolute left-0 top-1/2 h-0.5 w-full rounded-full bg-current transition-transform duration-300 ease-in-out"
+        style={{
+          transform: open ? "translateY(-50%) rotate(45deg)" : "translateY(calc(-50% - 6px))",
+        }}
+      />
+      <span
+        className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 rounded-full bg-current transition-opacity duration-200 ease-in-out"
+        style={{ opacity: open ? 0 : 1 }}
+      />
+      <span
+        className="absolute left-0 top-1/2 h-0.5 w-full rounded-full bg-current transition-transform duration-300 ease-in-out"
+        style={{
+          transform: open ? "translateY(-50%) rotate(-45deg)" : "translateY(calc(-50% + 6px))",
+        }}
+      />
+    </span>
   );
 }
 
@@ -89,33 +117,35 @@ export function SiteNav() {
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:border-brand-teal hover:text-brand-teal lg:hidden"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-all duration-200 hover:border-brand-teal hover:text-brand-teal active:scale-90 lg:hidden"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
-          {open ? (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
+        <HamburgerIcon open={open} />
       </button>
 
-      {open && (
-        <div className="absolute inset-x-0 top-full z-20 border-b border-gray-200 bg-white px-6 py-4 shadow-md lg:hidden">
-          <nav className="flex flex-col items-start gap-4 text-sm">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                active={pathname === item.href}
-                onClick={() => setOpen(false)}
-              />
-            ))}
-            <ChatLink active={pathname === CHAT_ITEM.href} onClick={() => setOpen(false)} />
-          </nav>
-        </div>
-      )}
+      <div
+        aria-hidden={!open}
+        className={`absolute inset-x-0 top-full z-20 grid overflow-hidden border-gray-200 bg-white shadow-md transition-[grid-template-rows,opacity] duration-300 ease-in-out lg:hidden ${
+          open
+            ? "grid-rows-[1fr] border-b opacity-100"
+            : "pointer-events-none grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <nav className="flex min-h-0 flex-col items-start gap-2 px-6 py-4 text-sm">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              active={pathname === item.href}
+              onClick={() => setOpen(false)}
+            />
+          ))}
+          <ChatLink
+            active={pathname === CHAT_ITEM.href}
+            onClick={() => setOpen(false)}
+          />
+        </nav>
+      </div>
     </>
   );
 }
