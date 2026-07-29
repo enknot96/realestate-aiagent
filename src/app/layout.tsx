@@ -32,8 +32,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-2">
+        <header className="relative border-b border-gray-200 bg-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
             <Link href="/" className="flex items-center">
               <Image
                 src="/logo-full.png"
@@ -48,7 +48,7 @@ export default function RootLayout({
           </div>
         </header>
         <div className="flex flex-1 flex-col">{children}</div>
-        <footer className="border-t border-gray-200 bg-white py-4 text-center text-xs text-gray-500">
+        <footer className="border-t border-gray-200 bg-white py-8 text-center text-xs text-gray-500">
           © {new Date().getFullYear()} みらい不動産株式会社
         </footer>
       </body>
