@@ -1,11 +1,8 @@
 # 不動産AIエージェント
 
-自作の[不動産業務管理API（ポートフォリオ④）](https://github.com/enknot96/realestate-api)を「道具」として使うAIエージェントと、物件を自分で探せる一覧・詳細ページを1つのサイトに同居させた作品です。Next.js (App Router) + Vercel AI SDK v7 + Gemini で実装しています。
+自作の[不動産業務管理API](https://github.com/enknot96/realestate-api)を「道具」として使うAIエージェントと、物件を自分で探せる一覧・詳細ページを1つのサイトに同居させた作品です。Next.js (App Router) + Vercel AI SDK v7 + Gemini で実装しています。
 
 - **デモ**: https://realestate-aiagent.vercel.app
-- **デモ動画**:
-
-  ![デモ: 検索から内見予約承認までの一連の流れ](docs/demo.gif)
 
 > 🎬 **30秒で分かるこの作品**: 「予算8万円以内、ペット可の2LDKを探して」と話しかけると、AIが実際のAPIを検索し、0件なら自分の判断で条件を緩めて再検索し、内見の空き枠を確認し、ユーザーの承認を得てから本物のDBに予約を書き込みます。書き込み直前には、承認した内容とAPIに送られる内容の一致をHMAC署名で検証します。
 
@@ -31,20 +28,20 @@
 
 | ポイント | ファイル | 内容 |
 |---|---|---|
-| 承認引数のHMAC一致検証 | [`src/lib/approvalSignature.ts`](src/lib/approvalSignature.ts) / [`src/ai/tools.ts`](src/ai/tools.ts) | 「ユーザーが承認した内容」と「④APIに送られる内容」の一致を暗号学的に保証。**初回のE2Eテストで、モデルが承認済みの10:00を18:00に取り違えて実行しようとしたのを実際にブロックした**（下記に詳細） |
-| エージェントの回帰テスト（evals） | [`tests/evals/agentJudgment.eval.test.ts`](tests/evals/agentJudgment.eval.test.ts) | 「検索0件→条件を緩めた再検索が起きるか」を、④APIをモックした固定シナリオ×実モデルでアサート |
+| 承認引数のHMAC一致検証 | [`src/lib/approvalSignature.ts`](src/lib/approvalSignature.ts) / [`src/ai/tools.ts`](src/ai/tools.ts) | 「ユーザーが承認した内容」と「realestate-apiに送られる内容」の一致を暗号学的に保証。**初回のE2Eテストで、モデルが承認済みの10:00を18:00に取り違えて実行しようとしたのを実際にブロックした**（下記に詳細） |
+| エージェントの回帰テスト（evals） | [`tests/evals/agentJudgment.eval.test.ts`](tests/evals/agentJudgment.eval.test.ts) | 「検索0件→条件を緩めた再検索が起きるか」を、realestate-apiをモックした固定シナリオ×実モデルでアサート |
 | 承認ゲートの決定的テスト | [`tests/unit/approvalGate.test.ts`](tests/unit/approvalGate.test.ts) | 「いきなり書き込みツールを呼ぶモデル」を`MockLanguageModelV4`に演じさせ、承認なしに実行されないことを毎回のテストで検証 |
 | モデルフォールバック | [`src/ai/model.ts`](src/ai/model.ts) | 主モデルの503/429時に別モデルへ自動切替（無料枠はモデル別のため実効枠が合算される） |
 | エージェント本体の分離 | [`src/ai/agent.ts`](src/ai/agent.ts) | プロンプト＋ツール＋実行設定を`runAgent()`に集約し、HTTPルートとevalsが同一実体を使う |
-| JWTのサーバー内完結 | [`src/lib/agentAuth.ts`](src/lib/agentAuth.ts) | ④の認証トークンをサーバー側でのみ取得・キャッシュ。`server-only`でクライアント混入をビルド時に遮断 |
-| 画像対応の前方互換設計 | [`src/components/property.tsx`](src/components/property.tsx) | ④が画像未対応の段階から`imageUrl: string \| null`前提でUIを実装。④にVercel Blob対応を追加した瞬間、**このリポジトリのコードは1行も変えずに**実画像へ切り替わった |
+| JWTのサーバー内完結 | [`src/lib/agentAuth.ts`](src/lib/agentAuth.ts) | realestate-apiの認証トークンをサーバー側でのみ取得・キャッシュ。`server-only`でクライアント混入をビルド時に遮断 |
+| 画像対応の前方互換設計 | [`src/components/property.tsx`](src/components/property.tsx) | realestate-apiが画像未対応の段階から`imageUrl: string \| null`前提でUIを実装。realestate-apiにVercel Blob対応を追加した瞬間、**このリポジトリのコードは1行も変えずに**実画像へ切り替わった |
 
 ## この作品が証明したいこと
 
 ポートフォリオ全体の中で、この作品は「**AIが判断してツールを呼び、多段で仕事を進める（agentic）**」を担当しています。
 
-1. **検索 vs 行動**: RAG検索の作品②が「検索して答える」のに対し、⑥は「状況を判断して行動する」。**この対比を、⑥という1つの製品の中でも再現しています**——`/properties`は自分で条件を絞り込んで探す検索UI、チャットは条件を伝えるだけでAIが検索・判断・予約まで代行するエージェントUI。同じ④のデータを、2つの体験様式で提供しています
-2. **④との接続**: ツールの実体はモックではなく、**自分で設計・実装・デプロイした本物のREST API**です。API設計力とエージェント設計を一本の線でつなげています。エージェント側の要求（内見空き枠の確認・物件画像対応）に応じて④に公開エンドポイントやカラムを追加するなど、APIを進化させる方向の作業も発生しました
+1. **検索 vs 行動**: `/properties`は自分で条件を絞り込んで探す検索UI、チャットは条件を伝えるだけでAIが検索・判断・予約まで代行するエージェントUI。同じrealestate-apiのデータを、2つの体験様式で提供しています
+2. **realestate-apiとの接続**: ツールの実体はモックではなく、**自分で設計・実装・デプロイした本物のREST API**です。API設計力とエージェント設計を一本の線でつなげています。エージェント側の要求（内見空き枠の確認・物件画像対応）に応じてrealestate-apiに公開エンドポイントやカラムを追加するなど、APIを進化させる方向の作業も発生しました
 3. **前職ドメインの反映**: ハウスメーカー営業6年の経験を、検索0件時の条件緩和の優先順位（予算を少し上げる→間取りを広げる。ペット可などのこだわり条件は勝手に外さない — お客様の妥協しやすさの実感に基づく）としてエージェントの判断ロジックに落とし込んでいます
 
 ## アーキテクチャ
@@ -62,12 +59,12 @@
 │  /properties, /properties/[id]: 一覧・詳細（SSR）│
 │  /api/chat: streamText + 7ツール + 承認ゲート    │
 │  ・HMAC署名の発行/検証（承認引数の一致保証）      │
-│  ・④のJWTをサーバー内でのみ取得・キャッシュ      │
+│  ・JWTをサーバー内でのみ取得・キャッシュ          │
 └───┬──────────────┬──────────────┬─────────────┘
     │ tool calling  │ HTTP(S)      │ OpenTelemetry
 ┌───▼────────┐ ┌───▼──────────┐ ┌─▼──────────┐
-│ Gemini      │ │ ④不動産業務  │ │ Langfuse    │
-│ 3.5-flash   │ │ 管理API      │ │ Cloud       │
+│ Gemini      │ │ realestate-  │ │ Langfuse    │
+│ 3.5-flash   │ │ api          │ │ Cloud       │
 │ ↓fallback   │ │ (Hono+Neon,  │ │ (トレース)   │
 │ 3.1-flash-  │ │  Vercel)     │ │             │
 │ lite        │ │  ↳ Vercel    │ │             │
@@ -79,30 +76,28 @@
 
 `/properties`（一覧）・`/properties/[id]`（詳細）を追加し、チャットと共存させています。
 
-![物件一覧ページ](docs/properties-list.png)
-
-- **一覧ページ**: 種別・価格帯・間取り・キーワードで絞り込み（GETフォーム、JS不要）。物件カードは④の`imageUrl`を表示し、未設定の物件は「画像準備中」プレースホルダーに自動フォールバック
+- **一覧ページ**: 種別・価格帯・間取り・キーワードで絞り込み（GETフォーム、JS不要）。物件カードはrealestate-apiの`imageUrl`を表示し、未設定の物件は「画像準備中」プレースホルダーに自動フォールバック
 - **詳細ページ**: 存在しないIDは`notFound()`で404。「この物件についてAIエージェントに相談する」から`/?ask=...`でチャット入力欄に質問文をプレフィルし、送信は本人に委ねる（自動送信しない）
 - **チャット→サイトの導線**: `searchProperties`/`getPropertyDetail`の結果に、詳細ページへ飛べるリンクチップを表示。新しいタブで開き、チャットの会話状態は保持したまま
-- **④の画像対応を先取りした設計**: `PropertySummary.imageUrl`を`string | null`の前方互換型で先に実装し、④側にVercel Blob対応（画像URLをDBに保存し、画像本体は専用オブジェクトストレージに置く一般的なパターン）が入った瞬間、⑥のコード変更なしで実画像に切り替わることを確認済み
+- **realestate-apiの画像対応を先取りした設計**: `PropertySummary.imageUrl`を`string | null`の前方互換型で先に実装し、realestate-api側にVercel Blob対応（画像URLをDBに保存し、画像本体は専用オブジェクトストレージに置く一般的なパターン）が入った瞬間、コード変更なしで実画像に切り替わることを確認済み
 
 ## エージェント設計
 
-### ツール一覧（④APIの道具化）
+### ツール一覧（realestate-apiの道具化）
 
 読み取り系と書き込み系を明確に分け、書き込み系にだけ承認を要求します。
 
-| ツール | ④のエンドポイント | 認証 | 承認 |
+| ツール | realestate-apiのエンドポイント | 認証 | 承認 |
 |---|---|---|---|
 | `searchProperties` | `GET /properties` | 不要 | — |
 | `getPropertyDetail` | `GET /properties/:id` | 不要 | — |
 | `checkViewingAvailability` | `GET /properties/:id/availability` ※ | 不要 | — |
-| `prepareInquiryConfirmation` | （④を呼ばずHMAC発行） | — | — |
+| `prepareInquiryConfirmation` | （realestate-apiを呼ばずHMAC発行） | — | — |
 | `createInquiry` | `POST /properties/:id/inquiries` | 不要 | **必要** |
-| `prepareViewingConfirmation` | （④を呼ばずHMAC発行） | — | — |
+| `prepareViewingConfirmation` | （realestate-apiを呼ばずHMAC発行） | — | — |
 | `createViewing` | `POST /inquiries/:id/viewings` | **JWT** | **必要** |
 
-※ エージェントのために④側へ新規追加した公開エンドポイント。
+※ エージェントのためにrealestate-api側へ新規追加した公開エンドポイント。
 
 ### 「単なるツール呼び出し」と「エージェント」の分かれ目
 
@@ -118,11 +113,11 @@
 
 1. **承認ゲート（AI SDK v7の`toolApproval`）**: AIが書き込みツールを呼ぶと実行前にストリームが停止し、引数を日本語で整形した承認カードがUIに表示されます。ユーザーが承認して初めてサーバーの`execute`が動き、拒否すればその意思がAIに伝わります
 2. **HMAC署名による引数一致検証**: 書き込みツールは、直前に`prepare`系ツールがサーバー秘密鍵で発行した「引数一式＋ツール種別＋有効期限10分」への署名を要求します。**引数が1文字でも変わると検証に失敗して実行拒否**。ステートレスなのでサーバーレス環境でもそのまま動きます
-3. **認証情報のサーバー内完結**: ④のJWTはサーバー側でのみ取得・キャッシュし（期限1分前に再取得・401で再ログイン1回）、クライアントには一切渡しません。`import "server-only"`により、誤ってクライアントバンドルに混入するとビルドが失敗します
+3. **認証情報のサーバー内完結**: realestate-apiのJWTはサーバー側でのみ取得・キャッシュし（期限1分前に再取得・401で再ログイン1回）、クライアントには一切渡しません。`import "server-only"`により、誤ってクライアントバンドルに混入するとビルドが失敗します
 
 ### 設計が実際に働いた話
 
-初回のE2Eテストで、ユーザーが承認したのは「7/18 **10:00**」の内見予約でしたが、モデルは`createViewing`を「7/18 **18:00**」（空き枠にすら存在しない時刻）で実行しようとしました。HMAC検証が`CONFIRMATION_MISMATCH`で実行を拒否し、④へのリクエストは発生せず、エラーを受け取ったモデルは自分で気づいて10:00で正しくやり直しました。「承認した内容と実行される内容の一致検証は本当に必要か」への答えが、本番初回で実演された形です。
+初回のE2Eテストで、ユーザーが承認したのは「7/18 **10:00**」の内見予約でしたが、モデルは`createViewing`を「7/18 **18:00**」（空き枠にすら存在しない時刻）で実行しようとしました。HMAC検証が`CONFIRMATION_MISMATCH`で実行を拒否し、realestate-apiへのリクエストは発生せず、エラーを受け取ったモデルは自分で気づいて10:00で正しくやり直しました。「承認した内容と実行される内容の一致検証は本当に必要か」への答えが、本番初回で実演された形です。
 
 ## 品質保証: 非決定的なエージェントをどうテストするか
 
@@ -131,17 +126,15 @@
 | 種類 | 実行 | 対象 | 方法 |
 |---|---|---|---|
 | ユニットテスト15件 | `pnpm test`（毎回） | HMAC署名・JWTキャッシュ・エラー整形・**承認ゲート** | 承認ゲートは`MockLanguageModelV4`に「いきなり書き込みツールを呼ぶ台本」を演じさせ、承認なしに`execute`が走らないことを決定的に検証 |
-| エージェントevals 2件 | `pnpm test:evals`（明示実行） | **モデルの判断そのもの** | ④APIをモックして「6.5万円は0件・7.15万円なら1件」のシナリオを固定し、実モデルで「条件を緩めた再検索が発生する」「氏名・メール未提供のうちは書き込みツールを呼ばない」をツール呼び出し列でアサート |
+| エージェントevals 2件 | `pnpm test:evals`（明示実行） | **モデルの判断そのもの** | realestate-apiをモックして「6.5万円は0件・7.15万円なら1件」のシナリオを固定し、実モデルで「条件を緩めた再検索が発生する」「氏名・メール未提供のうちは書き込みツールを呼ばない」をツール呼び出し列でアサート |
 
-役割分担のポイント: 「判断の質」は実モデルでしか測れないため④側をモックして決定化し、「安全構造」はモデルをモックして毎回のテストに組み込む、という使い分けをしています。実モデルevalsは無料枠を消費するため通常のテストから分離しています。
+役割分担のポイント: 「判断の質」は実モデルでしか測れないためrealestate-api側をモックして決定化し、「安全構造」はモデルをモックして毎回のテストに組み込む、という使い分けをしています。実モデルevalsは無料枠を消費するため通常のテストから分離しています。
 
-④側にも**75件**の自動テストがあり（unit 41件: サービス層の状態遷移・所有権・可視性ルール／integration 34件: HTTPエンドポイント・CSRF・**3箇所のトランザクションについて2番目の処理を`vi.spyOn`で強制失敗させDBの実値でロールバックを確認**）、⑥のevalsとは異なるレイヤー（APIの正しさ）を担保しています。⑥のevalsが「AIの判断」を、④のテストが「データを預かるAPIの正しさ」を守る、という役割分担です。
+realestate-api側にも**75件**の自動テストがあり（unit 41件: サービス層の状態遷移・所有権・可視性ルール／integration 34件: HTTPエンドポイント・CSRF・**3箇所のトランザクションについて2番目の処理を`vi.spyOn`で強制失敗させDBの実値でロールバックを確認**）、このリポジトリのevalsとは異なるレイヤー（APIの正しさ）を担保しています。このリポジトリのevalsが「AIの判断」を、realestate-apiのテストが「データを預かるAPIの正しさ」を守る、という役割分担です。
 
 ## 可観測性（Langfuse）
 
 Vercel AI SDKのOpenTelemetryテレメトリをLangfuse Cloudに送り、モデル呼び出し・ツール実行・マルチステップの流れをトレースとして可視化しています。
-
-![Langfuseのトレース画面: 多段ツール連鎖のツリー表示](docs/langfuse-trace.png)
 
 - Next.jsの計装フック（`src/instrumentation.ts`）で`LangfuseSpanProcessor`を登録
 - Vercelのサーバーレスではレスポンス送信後に関数が凍結されるため、`next/server`の`after()`で**応答完了後に`forceFlush()`** してトレース欠落を防いでいます
@@ -153,7 +146,7 @@ Vercel AI SDKのOpenTelemetryテレメトリをLangfuse Cloudに送り、モデ�
 
 - **モデル側の503/429**: `ai-fallback`で`gemini-3.5-flash`→`gemini-3.1-flash-lite`へ自動切替（リトライ可能なエラーのみ・60秒後に主モデルへ復帰）。無料枠はモデルごとに別枠のため、実効的な枠の合算にもなっています。開発中に実際に3.5-flashの503が頻発した実体験から、フォールバック先が7ツールの多段フローを完走できることも検証済みです
 - **無料枠の枯渇（429）**: 「本日のデモ利用枠を使い切りました」と正直に表示します（デモという性質上、自前のレート制限は作り込まない割り切り）
-- **④API側の障害**: ツールは接続失敗やエラーレスポンスを構造化（`{error: {code, message}}`）してAIに返し、AIが正直に報告・リカバリします。検索0件→条件変更、HMAC不一致→確認からやり直し、といった自己修正が実際に動作しています
+- **realestate-api側の障害**: ツールは接続失敗やエラーレスポンスを構造化（`{error: {code, message}}`）してAIに返し、AIが正直に報告・リカバリします。検索0件→条件変更、HMAC不一致→確認からやり直し、といった自己修正が実際に動作しています
 
 ## プロンプト設計
 
@@ -170,7 +163,7 @@ Googleの公式プロンプト設計ガイドの推奨に基づき、システ�
 | FW | Next.js 16 (App Router) | Route Handler + `after()` |
 | エージェント | Vercel AI SDK v7 | `streamText`マルチステップ・`tool()`・`toolApproval`・`isStepCount` |
 | モデル | Gemini 3.5 Flash（無料枠） | `ai-fallback`で3.1 Flash-Liteへ自動切替 |
-| ツールの実体 | ④不動産業務管理API | Hono + Drizzle + Neon（別リポジトリ・デプロイ済み）。画像はVercel Blob（DBにはURLのみ保存） |
+| ツールの実体 | realestate-api（不動産業務管理API） | Hono + Drizzle + Neon（別リポジトリ・デプロイ済み）。画像はVercel Blob（DBにはURLのみ保存） |
 | 可観測性 | Langfuse Cloud | OpenTelemetry経由・無料プラン |
 | UI | React 19 + Tailwind CSS v4 | ツール実行タイムライン・承認カード・空き枠チップ・物件一覧/詳細ページ |
 | テスト | Vitest | ユニット15件＋実モデルevals 2件（分離実行） |
@@ -187,8 +180,8 @@ pnpm dev
 | 環境変数 | 内容 |
 |---|---|
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI StudioのAPIキー |
-| `REALESTATE_API_BASE_URL` | ④APIのベースURL |
-| `DEMO_AGENT_EMAIL` / `DEMO_AGENT_PASSWORD` | ④のデモ用エージェント（`createViewing`のJWT取得に使用・サーバー側のみ） |
+| `REALESTATE_API_BASE_URL` | realestate-apiのベースURL |
+| `DEMO_AGENT_EMAIL` / `DEMO_AGENT_PASSWORD` | realestate-apiのデモ用エージェント（`createViewing`のJWT取得に使用・サーバー側のみ） |
 | `APPROVAL_SIGNATURE_SECRET` | 承認引数HMAC署名の秘密鍵（`openssl rand -hex 32`等で生成） |
 | `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_BASE_URL` | Langfuseの接続情報（未設定ならトレーシングは自動で無効化） |
 
@@ -201,8 +194,8 @@ pnpm test:evals  # エージェントevals（実モデルを叩くため明示�
 
 - **顧客の本人認証は範囲外**: チャットするユーザー＝問い合わせ主とみなし、会員登録やメール認証は作りません（エージェントの多段判断が主役のため）
 - **会話履歴の永続化なし**: リロードで消えます。セッション管理はこの作品の証明したいことに含めていません
-- **承認フローの残余リスク**: 承認とツール呼び出しの紐付けはAI SDKが管理し、引数の一致はHMACで保証しますが、クライアントが自分の会話履歴を改ざんする攻撃への完全な防御（履歴自体の署名）はデモの範囲外としています。最終防衛線は④API側のバリデーション・認可です
+- **承認フローの残余リスク**: 承認とツール呼び出しの紐付けはAI SDKが管理し、引数の一致はHMACで保証しますが、クライアントが自分の会話履歴を改ざんする攻撃への完全な防御（履歴自体の署名）はデモの範囲外としています。最終防衛線はrealestate-api側のバリデーション・認可です
 - **無料枠の制約**: Gemini無料枠（RPD上限）を使い切ると、その日はデモが応答しなくなります。フォールバックで実効枠を広げつつ、枯渇時は正直に表示します
 - **UIはライトテーマ固定**: ダークモード対応より、ツール実行の可視化と承認UXに工数を割きました
-- **画像は1物件1枚**: ギャラリー・複数画像・アップロードUIは作らず、④のシードデータにVercel Blob経由で1枚ずつ紐付ける運用に留めています
-- **一覧・詳細ページはSSRのみ**: お気に入り・会員機能・地図表示は範囲外。検索UIとエージェントUIの対比を見せることが目的のため、絞り込み条件も④のクエリパラメータで表現できる範囲（種別・価格帯・間取り・キーワード）に限定しています
+- **画像は1物件1枚**: ギャラリー・複数画像・アップロードUIは作らず、realestate-apiのシードデータにVercel Blob経由で1枚ずつ紐付ける運用に留めています
+- **一覧・詳細ページはSSRのみ**: お気に入り・会員機能・地図表示は範囲外。検索UIとエージェントUIの対比を見せることが目的のため、絞り込み条件もrealestate-apiのクエリパラメータで表現できる範囲（種別・価格帯・間取り・キーワード）に限定しています

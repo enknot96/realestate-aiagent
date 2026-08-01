@@ -103,7 +103,7 @@ export default async function HomePage() {
             <div className="mb-3 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-lg font-bold">
                 <StarIcon className="h-5 w-5 text-brand-teal" />
-                おすすめ物件ピックアップ
+                おすすめ物件
               </h2>
               <Link
                 href="/properties"
