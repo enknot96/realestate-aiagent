@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
 import { PropertySearchForm } from "@/components/property-search-form";
+import { PropertySortSelect } from "@/components/property-sort-select";
 import { ArrowLeftIcon, ArrowRightIcon, SearchIcon } from "@/components/icons";
 import {
   buildSearchParams,
@@ -26,6 +27,7 @@ type SearchParams = {
   maxPrice?: string | string[];
   layout?: string | string[];
   keyword?: string | string[];
+  sort?: string | string[];
   offset?: string | string[];
 };
 
@@ -98,6 +100,7 @@ export default async function PropertiesPage({
           {chips.map((chip) => (
             <li key={chip.key}>
               <Link
+                // sort は conditionChips に含まれないので、チップを外しても並び順は残る
                 href={listHref({ ...conditions, [chip.key]: undefined })}
                 aria-label={`${chip.label}の条件を外す`}
                 className="flex items-center gap-1 rounded-full border border-brand-teal/40 bg-brand-teal/5 py-0.5 pr-2 pl-3 text-brand-teal hover:bg-brand-teal/10"
@@ -122,9 +125,12 @@ export default async function PropertiesPage({
       ) : (
         <>
           {data.total > 0 && data.properties.length > 0 && (
-            <p className="text-sm text-gray-500">
-              全{data.total}件中 {offset + 1}〜{offset + data.properties.length}件を表示
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm text-gray-500">
+                全{data.total}件中 {offset + 1}〜{offset + data.properties.length}件を表示
+              </p>
+              <PropertySortSelect conditions={conditions} />
+            </div>
           )}
 
           {data.total === 0 ? (

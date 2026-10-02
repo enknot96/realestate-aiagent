@@ -59,6 +59,16 @@ export const PRICE_PRESETS: Record<PropertySummary["type"], number[]> = {
 
 export const LAYOUT_OPTIONS = ["1K", "1DK", "1LDK", "2DK", "2LDK", "3LDK", "4LDK", "5DK"];
 
+// 一覧の並び順。APIの sort パラメータの値と一致させる（未指定は id 昇順の「標準」）
+export type PropertySort = "newest" | "price_asc" | "price_desc";
+
+export const SORT_OPTIONS: { value: PropertySort | ""; label: string }[] = [
+  { value: "", label: "標準" },
+  { value: "newest", label: "新着順" },
+  { value: "price_asc", label: "価格の安い順" },
+  { value: "price_desc", label: "価格の高い順" },
+];
+
 // URLの searchParams を正規化した検索条件。値が不正な項目は undefined（＝未指定）として扱う
 export type PropertySearchConditions = {
   type?: PropertySummary["type"];
@@ -66,6 +76,8 @@ export type PropertySearchConditions = {
   maxPrice?: number;
   layout?: string;
   keyword?: string;
+  // 並び順は絞り込み条件ではないので、チップ・0件時の質問文には含めない
+  sort?: PropertySort;
 };
 
 type RawParam = string | string[] | undefined;
@@ -85,14 +97,18 @@ export function parseSearchConditions(raw: {
   maxPrice?: RawParam;
   layout?: RawParam;
   keyword?: RawParam;
+  sort?: RawParam;
 }): PropertySearchConditions {
   const type = firstParam(raw.type);
+  const sort = firstParam(raw.sort);
   return {
     type: type === "rent" || type === "sale" ? type : undefined,
     minPrice: parsePrice(raw.minPrice),
     maxPrice: parsePrice(raw.maxPrice),
     layout: firstParam(raw.layout),
     keyword: firstParam(raw.keyword),
+    // 不正な値をAPIに送ると422になるため、未知の値は未指定（標準）にする
+    sort: sort === "newest" || sort === "price_asc" || sort === "price_desc" ? sort : undefined,
   };
 }
 
@@ -104,6 +120,7 @@ export function buildSearchParams(conditions: PropertySearchConditions): URLSear
   if (conditions.maxPrice !== undefined) params.set("maxPrice", String(conditions.maxPrice));
   if (conditions.layout) params.set("layout", conditions.layout);
   if (conditions.keyword) params.set("keyword", conditions.keyword);
+  if (conditions.sort) params.set("sort", conditions.sort);
   return params;
 }
 

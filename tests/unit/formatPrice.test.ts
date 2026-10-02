@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildSearchParams,
   buildZeroResultsQuestion,
+  conditionChips,
   formatPrice,
   parseSearchConditions,
 } from "@/lib/property";
@@ -53,5 +55,32 @@ describe("parseSearchConditions / buildZeroResultsQuestion", () => {
     expect(q).toBe(
       "賃貸・家賃8万円以下・2LDK・「ペット可」の条件で探しましたが見つかりませんでした。条件を緩めた提案をお願いします",
     );
+  });
+});
+
+describe("sort（並び順）", () => {
+  it("3つの値はそのまま解釈する", () => {
+    for (const sort of ["newest", "price_asc", "price_desc"] as const) {
+      expect(parseSearchConditions({ sort }).sort).toBe(sort);
+    }
+  });
+
+  it("不正な値・空・未指定は undefined にする", () => {
+    expect(parseSearchConditions({ sort: "foo" }).sort).toBeUndefined();
+    expect(parseSearchConditions({ sort: "" }).sort).toBeUndefined();
+    expect(parseSearchConditions({}).sort).toBeUndefined();
+  });
+
+  it("buildSearchParams に反映し、未指定なら含めない", () => {
+    expect(buildSearchParams({ type: "rent", sort: "price_asc" }).toString()).toBe(
+      "type=rent&sort=price_asc",
+    );
+    expect(buildSearchParams({ type: "rent" }).has("sort")).toBe(false);
+  });
+
+  it("conditionChips と 0件時の質問文には含めない", () => {
+    expect(conditionChips({ sort: "newest" })).toEqual([]);
+    expect(conditionChips({ type: "rent", sort: "newest" }).map((c) => c.key)).toEqual(["type"]);
+    expect(buildZeroResultsQuestion({ sort: "newest" })).toBe("おすすめの物件を教えてください");
   });
 });
