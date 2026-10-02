@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Geist_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "みらい不動産",
     description: DESCRIPTION,
-    images: [{ url: "/home-hero.jpeg", width: 1200, height: 630, alt: "みらい不動産" }],
+    images: [{ url: "/home-hero.jpeg", width: 1024, height: 572, alt: "みらい不動産" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -41,6 +41,11 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["/home-hero.jpeg"],
   },
+};
+
+// iPhoneのセーフエリア（env(safe-area-inset-*)）を有効にする
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -54,8 +59,8 @@ export default function RootLayout({
       className={`${zenKakuGothicNew.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white shadow-sm">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
+        <header className="sticky top-0 z-30 h-(--site-header-h) border-b border-gray-200 bg-white shadow-sm">
+          <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 py-2">
             <Link href="/" className="flex items-center">
               <Image
                 src="/logo-full.png"

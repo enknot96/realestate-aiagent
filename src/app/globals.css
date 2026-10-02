@@ -8,6 +8,20 @@
   --brand-navy: #163a5c;
   --brand-teal: #0f6e8c;
   --brand-mint: #6fd08c;
+
+  /* 固定ヘッダーの高さ（layout.tsx のヘッダーと /chat の全画面レイアウトが共通で参照する）。
+     ロゴの高さ(h-12 / sm:h-14 / lg:h-16) + 上下padding(0.5rem×2) + 下ボーダー(1px) */
+  --site-header-h: 4.0625rem;
+}
+@media (min-width: 40rem) {
+  :root {
+    --site-header-h: 4.5625rem;
+  }
+}
+@media (min-width: 64rem) {
+  :root {
+    --site-header-h: 5.0625rem;
+  }
 }
 
 @theme inline {
