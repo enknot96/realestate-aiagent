@@ -3,17 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-
-const NAV_ITEMS = [
-  { href: "/", label: "ホーム" },
-  { href: "/concept", label: "みらい不動産について" },
-  { href: "/company", label: "会社概要" },
-  { href: "/contact", label: "お問い合わせ" },
-  { href: "/properties", label: "物件を探す" },
-];
-
-const CHAT_ITEM = { href: "/chat", label: "みらいくんに相談する" };
+import { useEffect, useRef, useState } from "react";
+import { CHAT_ITEM, NAV_ITEMS, isActivePath } from "@/lib/nav";
 
 function NavLink({
   href,
@@ -97,19 +88,44 @@ function HamburgerIcon({ open }: { open: boolean }) {
 export function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ページ遷移したらメニューを閉じる（レンダー中のstate調整）
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setOpen(false);
+  }
+
+  // 開いている間だけ Esc / メニュー外クリックで閉じる
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [open]);
 
   return (
-    <>
+    <div ref={containerRef} className="contents">
       <nav className="hidden items-center gap-5 text-sm lg:flex">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.href}
             href={item.href}
             label={item.label}
-            active={pathname === item.href}
+            active={isActivePath(pathname, item.href)}
           />
         ))}
-        <ChatLink active={pathname === CHAT_ITEM.href} />
+        <ChatLink active={isActivePath(pathname, CHAT_ITEM.href)} />
       </nav>
 
       <button
@@ -124,6 +140,7 @@ export function SiteNav() {
 
       <div
         aria-hidden={!open}
+        inert={!open}
         className={`absolute inset-x-0 top-full z-20 grid overflow-hidden border-gray-200 bg-white shadow-md transition-[grid-template-rows,opacity] duration-300 ease-in-out lg:hidden ${
           open
             ? "grid-rows-[1fr] border-b opacity-100"
@@ -136,16 +153,16 @@ export function SiteNav() {
               key={item.href}
               href={item.href}
               label={item.label}
-              active={pathname === item.href}
+              active={isActivePath(pathname, item.href)}
               onClick={() => setOpen(false)}
             />
           ))}
           <ChatLink
-            active={pathname === CHAT_ITEM.href}
+            active={isActivePath(pathname, CHAT_ITEM.href)}
             onClick={() => setOpen(false)}
           />
         </nav>
       </div>
-    </>
+    </div>
   );
 }
