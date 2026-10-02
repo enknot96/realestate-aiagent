@@ -3,6 +3,8 @@ import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
 import { PropertySearchForm } from "@/components/property-search-form";
 import { ArrowRightIcon, BellIcon, SearchIcon, StarIcon } from "@/components/icons";
+import { HeroChatEntry } from "@/components/home/hero-chat-entry";
+import { HowItWorks } from "@/components/home/how-it-works";
 import type { PropertyListResponse } from "@/lib/property";
 
 // 今回はCMS等を持たないため、ダミーの固定文言を表示する（今後のタスクで見直し予定）
@@ -36,13 +38,14 @@ export default async function HomePage() {
           className="brand-gradient-overlay absolute inset-0"
           aria-hidden="true"
         />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-4">
+        <div className="relative mx-auto flex w-full max-w-2xl flex-col items-center gap-4">
           <h1 className="text-3xl font-bold sm:text-5xl">探すから、 話せるへ。</h1>
           <p className="text-sm text-white/90 sm:text-base">
             AIエージェント「みらいくん」との会話で、
             <br />
             あなたにぴったりの住まいが見つかります。
           </p>
+          <HeroChatEntry />
         </div>
       </section>
 
@@ -54,6 +57,8 @@ export default async function HomePage() {
           </h2>
           <PropertySearchForm variant="compact" />
         </section>
+
+        <HowItWorks />
 
         {recommended.length > 0 && (
           <section>
@@ -97,19 +102,6 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-        </section>
-
-        <section className="flex flex-col items-center gap-3 rounded-lg border border-brand-teal/30 bg-brand-teal/5 p-6 text-center">
-          <h2 className="text-lg font-bold">条件が決まっていなくても大丈夫。</h2>
-          <p className="text-sm text-gray-600">
-            AIエージェント「みらいくん」に相談すれば、希望条件のヒアリングから物件提案・内見予約まで会話でお任せできます。
-          </p>
-          <Link
-            href="/chat"
-            className="rounded-lg bg-brand-teal px-6 py-2 text-sm font-bold text-white hover:bg-brand-navy"
-          >
-            みらいくんに相談する
-          </Link>
         </section>
       </div>
     </main>
