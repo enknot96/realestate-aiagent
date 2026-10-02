@@ -44,7 +44,7 @@ export function ImageDropzone({ onSelect, disabled }: Props) {
         <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
       </svg>
       <p className="text-sm font-bold text-brand-navy">物件資料の画像をドラッグ＆ドロップ</p>
-      <p className="text-xs text-gray-500">JPEG / PNG / WebP・4MBまで</p>
+      <p className="text-xs text-gray-500">JPEG / PNG / WebP・20MBまで（大きい画像は自動で縮小します）</p>
       <button
         type="button"
         disabled={disabled}

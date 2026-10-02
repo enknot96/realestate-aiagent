@@ -33,7 +33,8 @@ const leadInsightSchema = z.object({
   household: z.string().nullable().describe("家族構成・ペットなど。言及が無ければnull"),
   temperature: temperatureSchema.describe("見込み度。hot=すぐ動くべき / warm / cold"),
   temperatureReason: z.string().describe("温度感の根拠を1文で"),
-  nextActions: z.array(z.string()).max(3).describe("営業が次にやること。最大3つ、具体的に"),
+  // 件数の上限はスキーマで縛らない（4件返っただけで要約全体が失敗しないよう、受け取った後で3件に切り詰める）
+  nextActions: z.array(z.string()).describe("営業が次にやること。最大3つ、具体的に"),
   summary: z.string().describe("3行以内の要約"),
 });
 
@@ -178,5 +179,10 @@ export async function summarizeLead({
     output: Output.object({ schema: leadInsightSchema }),
   });
 
-  return { facts, ...output, ...adjustTemperature(output, facts) };
+  return {
+    facts,
+    ...output,
+    nextActions: output.nextActions.slice(0, 3),
+    ...adjustTemperature(output, facts),
+  };
 }

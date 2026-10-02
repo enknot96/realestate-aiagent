@@ -61,6 +61,11 @@ function ScenarioColumn({ scenario, maxLoan }: { scenario: MortgageScenario; max
             {formatPrice(fromIncome.comfortableMaxLoan)}
           </p>
           <p className="text-xs text-gray-600">{monthly(fromIncome.comfortableMonthly)}</p>
+          {fromIncome.comfortableCapped && (
+            <p className="mt-1 text-[11px] leading-snug text-amber-700">
+              金利の上昇に備え、審査上限を超えない額にしています
+            </p>
+          )}
           <div className="mt-2 h-1.5 rounded-full bg-gray-100" aria-hidden>
             <div
               className="h-full rounded-full bg-brand-teal"
@@ -69,7 +74,8 @@ function ScenarioColumn({ scenario, maxLoan }: { scenario: MortgageScenario; max
           </div>
 
           <p className="mt-3 text-xs text-gray-500">
-            審査上限の目安（{Math.round(fromIncome.screeningRatio * 100)}%）
+            審査上限の目安（返済負担率{Math.round(fromIncome.screeningRatio * 100)}%・審査金利
+            {fromIncome.screeningRate}%で試算）
           </p>
           <p className="text-sm font-semibold text-gray-600">
             {formatPrice(fromIncome.screeningMaxLoan)}

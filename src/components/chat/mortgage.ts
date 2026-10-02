@@ -9,11 +9,13 @@ export type MortgageScenario = {
   fromIncome?: {
     annualIncome: number;
     screeningRatio: number;
+    screeningRate: number;
     screeningMaxLoan: number;
     screeningMonthly: number;
     comfortableRatio: number;
     comfortableMaxLoan: number;
     comfortableMonthly: number;
+    comfortableCapped: boolean;
   };
 };
 
@@ -33,6 +35,7 @@ const MONEY_KEYS = ["monthlyPayment", "loanAmount", "totalPayment", "totalIntere
 const INCOME_KEYS = [
   "annualIncome",
   "screeningRatio",
+  "screeningRate",
   "screeningMaxLoan",
   "screeningMonthly",
   "comfortableRatio",
@@ -45,7 +48,12 @@ function isScenario(s: unknown): s is MortgageScenario {
   for (const key of ["fromMonthlyPayment", "fromLoanAmount"]) {
     if (s[key] !== undefined && !hasNums(s[key], MONEY_KEYS)) return false;
   }
-  return s.fromIncome === undefined || hasNums(s.fromIncome, INCOME_KEYS);
+  return (
+    s.fromIncome === undefined ||
+    (hasNums(s.fromIncome, INCOME_KEYS) &&
+      isObj(s.fromIncome) &&
+      typeof s.fromIncome.comfortableCapped === "boolean")
+  );
 }
 
 // 不正な形なら false（カードは何も描画しない）

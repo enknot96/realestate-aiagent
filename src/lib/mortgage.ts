@@ -17,6 +17,10 @@ export const SCREENING_RATIO_LOW_INCOME = 0.3;
 export const SCREENING_RATIO_HIGH_INCOME = 0.35;
 // 無理のない目安の返済負担率。作者（元ハウスメーカー営業）の経験に基づく目安で、公的な基準ではない
 export const COMFORTABLE_RATIO = 0.25;
+// 審査上限の目安に使う審査金利（%）。銀行は適用金利より高い審査金利で返済額を見積もるのが一般的だが、
+// 値は各行非公表で一次情報が無いため、作者の営業経験に基づく想定値（2026年10月時点）。
+// 適用金利の方が高い場合は適用金利を使う。将来は管理画面から変更できるようにする想定
+export const SCREENING_RATE = 3.5;
 
 export const DEFAULT_YEARS = 35;
 export const MAX_YEARS = 35;
@@ -34,7 +38,7 @@ export const MORTGAGE_SOURCES = [
   },
   {
     label: "住宅金融支援機構 フラット35（返済負担率の基準）",
-    url: "https://www.flat35.com/",
+    url: "https://www.flat35.com/loan/lineup/flat35/conditions/index.html",
   },
 ];
 
@@ -64,11 +68,13 @@ export type SimulateMortgageOutput = {
     fromIncome?: {
       annualIncome: number;
       screeningRatio: number; // 0.3 or 0.35
+      screeningRate: number; // 審査上限の試算に使った審査金利（%）。max(適用金利, SCREENING_RATE)
       screeningMaxLoan: number;
       screeningMonthly: number;
       comfortableRatio: number; // 0.25
-      comfortableMaxLoan: number;
-      comfortableMonthly: number;
+      comfortableMaxLoan: number; // 審査上限を超えない
+      comfortableMonthly: number; // 適用金利での月々の返済額
+      comfortableCapped: boolean; // 審査上限で頭打ちにしたか
     };
   }[]; // 常に [変動, 固定] の2要素
   note: string;
@@ -167,15 +173,31 @@ function buildScenario(
     const screeningRatio = screeningRatioFor(annualIncome);
     // 年間返済額の上限 = 年収 × 比率 → ÷12 で月額（円未満切り捨て。上限を超えないように）
     const screeningMonthly = Math.floor((annualIncome * screeningRatio) / 12);
-    const comfortableMonthly = Math.floor((annualIncome * COMFORTABLE_RATIO) / 12);
+    // 審査上限は、適用金利ではなく（より高い）審査金利で見積もる
+    const screeningRate = Math.max(rate, SCREENING_RATE);
+    const screeningMaxLoan = calcLoanAmount(screeningMonthly, screeningRate, years);
+
+    // 無理のない目安は適用金利で計算する。低金利の変動では審査上限を上回ることがあるため、
+    // 審査上限で頭打ちにする（「無理のない目安 > 審査上限」という矛盾した表示を避ける）
+    const comfortableRaw = calcLoanAmount(
+      Math.floor((annualIncome * COMFORTABLE_RATIO) / 12),
+      rate,
+      years,
+    );
+    const comfortableCapped = comfortableRaw > screeningMaxLoan;
+    const comfortableMaxLoan = comfortableCapped ? screeningMaxLoan : comfortableRaw;
+
     scenario.fromIncome = {
       annualIncome,
       screeningRatio,
-      screeningMaxLoan: calcLoanAmount(screeningMonthly, rate, years),
+      screeningRate,
+      screeningMaxLoan,
       screeningMonthly,
       comfortableRatio: COMFORTABLE_RATIO,
-      comfortableMaxLoan: calcLoanAmount(comfortableMonthly, rate, years),
-      comfortableMonthly,
+      comfortableMaxLoan,
+      // 頭打ちにした場合も、実際に借りる額の適用金利での返済額を示す
+      comfortableMonthly: calcMonthlyPayment(comfortableMaxLoan, rate, years),
+      comfortableCapped,
     };
   }
 

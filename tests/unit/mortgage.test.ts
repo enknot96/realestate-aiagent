@@ -94,38 +94,59 @@ describe("simulateMortgage（入力→変動・固定の2シナリオ）", () =>
     expect(fixed.loanAmount).toBe(23_200_000);
   });
 
-  it("年収500万円（35%）: 審査上限は月145,833円、無理のない目安（25%）は月104,166円", () => {
-    // 500万 × 0.35 ÷ 12 = 145,833.3 → 切り捨て145,833 / 500万 × 0.25 ÷ 12 = 104,166.6 → 104,166
-    // 借入額（変動1.2%・35年）: 145,833円 → 49,993,780円 → 4,999万円 / 104,166円 → 35,709,696円 → 3,570万円
+  it("年収500万円（35%）: 審査上限は審査金利で、無理のない目安は適用金利で計算し、審査上限で頭打ちにする", () => {
+    // 審査上限: 500万 × 0.35 ÷ 12 = 145,833.3 → 切り捨て145,833円
+    //   変動: 審査金利 max(1.2, 3.5) = 3.5% → 35,285,822円 → 3,528万円
+    //   固定: 審査金利 max(3.8, 3.5) = 3.8% → 33,847,058円 → 3,384万円
+    // 無理のない目安: 500万 × 0.25 ÷ 12 = 104,166.6 → 104,166円
+    //   変動1.2% → 3,570万円 だが審査上限3,528万円を超えるので頭打ち（月々は3,528万円を1.2%で借りた額）
+    //   固定3.8% → 24,176,371円 → 2,417万円（頭打ちなし）
     const out = ok(simulateMortgage({ annualIncome: 5_000_000 }));
-    const variable = out.scenarios[0].fromIncome!;
-    expect(variable).toEqual({
+    expect(out.scenarios[0].fromIncome).toEqual({
       annualIncome: 5_000_000,
       screeningRatio: 0.35,
+      screeningRate: 3.5,
       screeningMonthly: 145_833,
-      screeningMaxLoan: 49_990_000,
+      screeningMaxLoan: 35_280_000,
       comfortableRatio: 0.25,
-      comfortableMonthly: 104_166,
-      comfortableMaxLoan: 35_700_000,
+      comfortableMaxLoan: 35_280_000,
+      comfortableMonthly: 102_913,
+      comfortableCapped: true,
     });
-    // 固定3.8%: 145,833円 → 33,847,058円 / 104,166円 → 24,176,371円
     const fixed = out.scenarios[1].fromIncome!;
+    expect(fixed.screeningRate).toBe(3.8);
     expect(fixed.screeningMaxLoan).toBe(33_840_000);
     expect(fixed.comfortableMaxLoan).toBe(24_170_000);
+    expect(fixed.comfortableCapped).toBe(false);
+  });
+
+  it("無理のない目安は、どの年収・金利でも審査上限を超えない", () => {
+    for (const annualIncome of [2_500_000, 3_990_000, 4_000_000, 6_000_000, 12_000_000]) {
+      for (const scenario of ok(simulateMortgage({ annualIncome })).scenarios) {
+        const income = scenario.fromIncome!;
+        expect(income.comfortableMaxLoan).toBeLessThanOrEqual(income.screeningMaxLoan);
+      }
+    }
+  });
+
+  it("適用金利が審査金利より高ければ、審査上限は適用金利で計算する", () => {
+    const income = ok(simulateMortgage({ annualIncome: 5_000_000, variableRate: 4.5 })).scenarios[0]
+      .fromIncome!;
+    expect(income.screeningRate).toBe(4.5);
   });
 
   it("年収400万円の境界: 399万円は30%、400万円ちょうどは35%", () => {
-    // 399万 × 0.30 ÷ 12 = 99,750円 → 34,195,823円（変動1.2%・35年）→ 3,419万円
+    // 399万 × 0.30 ÷ 12 = 99,750円 → 審査金利3.5%・35年で 24,135,557円 → 2,413万円
     const below = ok(simulateMortgage({ annualIncome: 3_990_000 })).scenarios[0].fromIncome!;
     expect(below.screeningRatio).toBe(0.3);
     expect(below.screeningMonthly).toBe(99_750);
-    expect(below.screeningMaxLoan).toBe(34_190_000);
+    expect(below.screeningMaxLoan).toBe(24_130_000);
 
-    // 400万 × 0.35 ÷ 12 = 116,666.6 → 116,666円 → 39,994,887円 → 3,999万円
+    // 400万 × 0.35 ÷ 12 = 116,666.6 → 116,666円 → 28,228,561円 → 2,822万円
     const at = ok(simulateMortgage({ annualIncome: 4_000_000 })).scenarios[0].fromIncome!;
     expect(at.screeningRatio).toBe(0.35);
     expect(at.screeningMonthly).toBe(116_666);
-    expect(at.screeningMaxLoan).toBe(39_990_000);
+    expect(at.screeningMaxLoan).toBe(28_220_000);
 
     // 無理のない目安は年収によらず25%
     expect(below.comfortableRatio).toBe(0.25);

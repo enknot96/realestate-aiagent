@@ -9,11 +9,13 @@ const money = { monthlyPayment: 80_000, loanAmount: 28_000_000, totalPayment: 33
 const income = {
   annualIncome: 5_000_000,
   screeningRatio: 0.35,
+  screeningRate: 3.5,
   screeningMaxLoan: 40_000_000,
   screeningMonthly: 145_000,
   comfortableRatio: 0.25,
   comfortableMaxLoan: 30_000_000,
   comfortableMonthly: 104_000,
+  comfortableCapped: false,
 };
 const base = {
   years: 35,

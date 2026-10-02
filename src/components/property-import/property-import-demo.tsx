@@ -5,7 +5,8 @@ import type { PropertyDraft } from "@/ai/property-import";
 import { DraftForm } from "./draft-form";
 import { ImageDropzone } from "./image-dropzone";
 import { toFormState, type DraftFieldKey, type DraftFormState } from "./form-state";
-import { validateImageFile } from "./validation";
+import { downscaleImage, MAX_SOURCE_BYTES } from "./resize-image";
+import { MAX_IMAGE_BYTES, validateImageFile } from "./validation";
 
 // 作者がサンプル画像を用意したら、ここに { label, src } を足すと「サンプルで試す」が出る
 // （src は public/ 配下のパス。例: "/samples/property-import-1.png"）
@@ -52,7 +53,24 @@ export function PropertyImportDemo() {
     [],
   );
 
-  function selectFile(selected: File) {
+  async function selectFile(original: File) {
+    // 形式は縮小前に確かめる。容量は縮小後に確かめる（スマホの写真は縮小すれば4MBに収まる）
+    const typeError = validateImageFile({ type: original.type, size: 1 });
+    if (typeError) {
+      setError(typeError);
+      return;
+    }
+    if (original.size > MAX_SOURCE_BYTES) {
+      setError("ファイルサイズが大きすぎます。20MB以下の画像を選んでください。");
+      return;
+    }
+    let selected: File;
+    try {
+      selected = await downscaleImage(original, MAX_IMAGE_BYTES);
+    } catch {
+      setError("画像を読み込めませんでした。別の画像を選んでください。");
+      return;
+    }
     const invalid = validateImageFile(selected);
     if (invalid) {
       setError(invalid);
@@ -73,7 +91,7 @@ export function PropertyImportDemo() {
   async function selectSample(src: string) {
     try {
       const blob = await (await fetch(src)).blob();
-      selectFile(new File([blob], src.split("/").pop() ?? "sample", { type: blob.type }));
+      await selectFile(new File([blob], src.split("/").pop() ?? "sample", { type: blob.type }));
     } catch {
       setError("サンプル画像を読み込めませんでした。");
     }
