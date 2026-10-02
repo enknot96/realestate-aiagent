@@ -52,15 +52,24 @@ export function PropertyCard({ property }: { property: PropertySummary }) {
   return (
     <Link
       href={`/properties/${property.id}`}
-      className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:shadow-md motion-safe:hover:-translate-y-0.5"
     >
-      <div className="aspect-[4/3] w-full overflow-hidden">
-        <PropertyThumbnail property={property} />
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        {/* ホバー時のズームはreduced-motionでは無効（motion-safe） */}
+        <div className="h-full w-full transition-transform duration-500 motion-safe:group-hover:scale-105">
+          <PropertyThumbnail property={property} />
+        </div>
+        <span
+          className={`absolute top-2 left-2 rounded px-2 py-0.5 text-xs font-bold text-white shadow-sm ${
+            property.type === "rent" ? "bg-brand-teal" : "bg-brand-navy"
+          }`}
+        >
+          {PROPERTY_TYPE_LABEL[property.type]}
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <span className="text-xs text-gray-500">{PROPERTY_TYPE_LABEL[property.type]}</span>
         <h3 className="line-clamp-2 text-sm font-bold">{property.title}</h3>
-        <p className="text-base font-bold text-brand-teal">{formatPrice(property.price)}</p>
+        <p className="text-base font-bold text-brand-teal">{formatPrice(property.price, property.type)}</p>
         <p className="text-xs text-gray-500">
           {property.layout ?? "-"}
           {property.area ? ` / ${property.area}㎡` : ""}
