@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Geist_Mono, Zen_Kaku_Gothic_New } from "next/font/google";
@@ -41,11 +41,6 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["/home-hero.jpeg"],
   },
-};
-
-// iPhoneのセーフエリア（env(safe-area-inset-*)）を有効にする
-export const viewport: Viewport = {
-  viewportFit: "cover",
 };
 
 export default function RootLayout({

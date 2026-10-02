@@ -129,7 +129,8 @@ export default async function PropertiesPage({
               <p className="text-sm text-gray-500">
                 全{data.total}件中 {offset + 1}〜{offset + data.properties.length}件を表示
               </p>
-              <PropertySortSelect conditions={conditions} />
+              {/* 検索フォームと同じく、「条件をクリア」等の同一route内遷移でselectの表示が古いまま残らないよう並び順をkeyにする */}
+              <PropertySortSelect key={conditions.sort ?? ""} conditions={conditions} />
             </div>
           )}
 
