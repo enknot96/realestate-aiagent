@@ -2,9 +2,10 @@
 
 import { CheckIcon, ClockIcon, ExclamationIcon, PauseIcon, XCircleIcon } from "@/components/icons";
 import { AvailabilitySlots } from "./availability-slots";
-import { PropertyLinks } from "./property-links";
+import { InquiryCompleteCard, ViewingCompleteCard } from "./completion-cards";
+import { PropertyCardRow, PropertyDetailCard } from "./property-links";
 import { TOOL_TITLES, TOOL_VIEWS } from "./tool-labels";
-import type { AvailabilityOutput, PropertyLinkItem, ToolPart } from "./types";
+import type { AvailabilityOutput, ConversationProperty, ToolPart } from "./types";
 
 export function ToolStep({
   part,
@@ -73,15 +74,18 @@ export function ToolStep({
     part.state === "output-available" &&
     !output.error;
 
-  const showPropertyLinks =
-    part.state === "output-available" &&
-    !output.error &&
-    (part.type === "tool-searchProperties" || part.type === "tool-getPropertyDetail");
-  const propertyLinks: PropertyLinkItem[] = !showPropertyLinks
-    ? []
-    : part.type === "tool-searchProperties"
-      ? ((output.properties as PropertyLinkItem[] | undefined) ?? [])
-      : [{ id: Number(output.id), title: String(output.title), price: Number(output.price) }];
+  // 成功時のみリッチカードを出す（エラー時は赤い1行表示のまま）
+  const succeeded = part.state === "output-available" && !output.error;
+  const searchedProperties =
+    succeeded && part.type === "tool-searchProperties"
+      ? ((output.properties as ConversationProperty[] | undefined) ?? [])
+      : [];
+  const showDetail = succeeded && part.type === "tool-getPropertyDetail";
+  const showViewingCard = succeeded && part.type === "tool-createViewing";
+  const showInquiryCard = succeeded && part.type === "tool-createInquiry";
+  // 完了カードが同じ情報を出すので、1行表示は短くする
+  if (showViewingCard) text = "内見予約を作成しました";
+  if (showInquiryCard) text = "問い合わせを作成しました";
 
   return (
     <div className="my-0.5 text-sm">
@@ -96,7 +100,14 @@ export function ToolStep({
       {showSlots && (
         <AvailabilitySlots output={output as AvailabilityOutput} onPickSlot={onPickSlot} />
       )}
-      <PropertyLinks properties={propertyLinks} />
+      <PropertyCardRow
+        properties={searchedProperties}
+        total={Number(output.total ?? 0)}
+        searchInput={input}
+      />
+      {showDetail && <PropertyDetailCard property={output as unknown as ConversationProperty} />}
+      {showViewingCard && <ViewingCompleteCard input={input} output={output} />}
+      {showInquiryCard && <InquiryCompleteCard input={input} output={output} />}
     </div>
   );
 }
