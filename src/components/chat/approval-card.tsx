@@ -6,7 +6,7 @@ import { PropertyThumbnail } from "@/components/property";
 import { formatPrice } from "@/lib/property";
 import { useConversationIndex } from "./conversation-context";
 import { jstDate, jstTime } from "./format";
-import { TOOL_TITLES } from "./tool-labels";
+import { APPROVAL_TITLES } from "./tool-labels";
 import type { ApprovalRequestedPart, ConversationProperty } from "./types";
 
 // 内見の枠は1時間
@@ -31,7 +31,10 @@ function PropertyMini({ property }: { property: ConversationProperty }) {
         {property.title && <p className="truncate font-bold">{property.title}</p>}
         {typeof property.price === "number" && (
           <p className="font-bold text-brand-navy">
-            {formatPrice(property.price, property.type === "sale" ? "sale" : "rent")}
+            {formatPrice(
+              property.price,
+              property.type === "rent" || property.type === "sale" ? property.type : undefined,
+            )}
           </p>
         )}
         {property.address && <p className="truncate text-xs text-gray-500">{property.address}</p>}
@@ -95,7 +98,7 @@ export function ApprovalCard({
       />
       <p id={titleId} className="mb-3 flex items-center gap-1.5 font-bold text-amber-900">
         {isViewing ? <CalendarIcon className="h-5 w-5" /> : <MailIcon className="h-5 w-5" />}
-        {TOOL_TITLES[part.type] ?? "操作の実行を確認"}
+        {APPROVAL_TITLES[part.type] ?? "操作の実行を確認"}
       </p>
 
       {property ? (

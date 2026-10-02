@@ -11,7 +11,14 @@ export const FIELD_LABELS: Record<string, string> = {
   scheduledAt: "内見日時",
 };
 
+// タイムラインの1行表示で使う操作名（「{操作名} — 実行をキャンセルしました」等）
 export const TOOL_TITLES: Record<string, string> = {
+  "tool-createInquiry": "問い合わせを送信します",
+  "tool-createViewing": "内見予約を作成します",
+};
+
+// 承認カードの見出し
+export const APPROVAL_TITLES: Record<string, string> = {
   "tool-createInquiry": "お問い合わせの送信を確認",
   "tool-createViewing": "内見予約の確定を確認",
 };

@@ -27,7 +27,12 @@ describe("toUtcStamp", () => {
 
 describe("escapeIcsText", () => {
   it("バックスラッシュ・セミコロン・カンマ・改行をエスケープする", () => {
-    expect(escapeIcsText("a\\b;c,d\ne")).toBe("a\\\\b\;c\\,d\\ne");
+    expect(escapeIcsText("a\\b;c,d\ne")).toBe("a\\\\b\\;c\\,d\\ne");
+  });
+
+  it("セミコロンの前にバックスラッシュが付く", () => {
+    // "\;" は JS では ";" と同じになるため、エスケープ漏れを文字単位で確認する
+    expect(escapeIcsText("1;2")).toBe(String.raw`1\;2`);
   });
 });
 
