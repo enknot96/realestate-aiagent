@@ -7,12 +7,15 @@ export function ChatComposer({
   input,
   setInput,
   onSubmit,
-  disabled,
+  onStop,
+  busy,
 }: {
   input: string;
   setInput: (value: string) => void;
   onSubmit: () => void;
-  disabled: boolean;
+  onStop: () => void;
+  // 応答中は入力はできるが、送信は止めて「停止」ボタンに切り替える
+  busy: boolean;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -21,16 +24,16 @@ export function ChatComposer({
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }
+  // 入力欄の外から値が変わった場合（新しい会話・プレフィル）にも高さを合わせる
   useEffect(() => {
     if (textareaRef.current) resizeTextarea(textareaRef.current);
-  }, []);
+  }, [input]);
 
   const submitMessage = () => {
-    if (input.trim() && !disabled) {
+    if (input.trim() && !busy) {
       onSubmit();
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
+      // ボタン押下で外れたフォーカスを入力欄に戻す
+      textareaRef.current?.focus();
     }
   };
 
@@ -52,22 +55,36 @@ export function ChatComposer({
           resizeTextarea(e.target);
         }}
         onKeyDown={(e) => {
+          // IMEの変換確定のEnterでは送信しない（keyCode 229はSafari対策）
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             submitMessage();
           }
         }}
-        disabled={disabled}
+        aria-label="メッセージを入力"
         placeholder="メッセージを入力…（Shift+Enterで改行）"
       />
-      <button
-        type="submit"
-        aria-label="送信"
-        className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-teal text-white transition-colors hover:bg-brand-navy disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={disabled || !input.trim()}
-      >
-        <SendIcon className="h-5 w-5" />
-      </button>
+      {busy ? (
+        <button
+          type="button"
+          aria-label="停止"
+          className="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-gray-700 px-4 text-sm font-bold text-white transition-colors hover:bg-gray-900"
+          onClick={onStop}
+        >
+          <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-white" />
+          停止
+        </button>
+      ) : (
+        <button
+          type="submit"
+          aria-label="送信"
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-teal text-white transition-colors hover:bg-brand-navy disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!input.trim()}
+        >
+          <SendIcon className="h-5 w-5" />
+        </button>
+      )}
     </form>
   );
 }

@@ -1,8 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CHAT_ITEM, NAV_ITEMS } from "@/lib/nav";
 
 export function SiteFooter() {
+  const pathname = usePathname();
+
+  // /chat は全画面のアプリ型レイアウトのため、フッターは出さない
+  if (pathname === CHAT_ITEM.href) return null;
+
   return (
     <footer className="border-t border-gray-200 bg-white">
       <div className="brand-gradient h-1" aria-hidden="true" />
