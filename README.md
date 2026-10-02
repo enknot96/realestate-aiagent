@@ -32,7 +32,7 @@
 | 承認引数のHMAC一致検証 | [`src/lib/approvalSignature.ts`](src/lib/approvalSignature.ts) / [`src/ai/tools.ts`](src/ai/tools.ts) | 「ユーザーが承認した内容」と「realestate-apiに送られる内容」の一致を暗号学的に保証。**初回のE2Eテストで、モデルが承認済みの10:00を18:00に取り違えて実行しようとしたのを実際にブロックした**（下記に詳細） |
 | エージェントの回帰テスト（evals） | [`tests/evals/agentJudgment.eval.test.ts`](tests/evals/agentJudgment.eval.test.ts) | 「検索0件→条件を緩めた再検索が起きるか」を、realestate-apiをモックした固定シナリオ×実モデルでアサート |
 | 承認ゲートの決定的テスト | [`tests/unit/approvalGate.test.ts`](tests/unit/approvalGate.test.ts) | 「いきなり書き込みツールを呼ぶモデル」を`MockLanguageModelV4`に演じさせ、承認なしに実行されないことを毎回のテストで検証 |
-| モデルフォールバック | [`src/ai/model.ts`](src/ai/model.ts) | 主モデルの503/429時に別モデルへ自動切替（無料枠はモデル別のため実効枠が合算される） |
+| モデルフォールバック | [`src/ai/model.ts`](src/ai/model.ts) | 主モデルの503/429時に、flash-lite系の2段へ順に自動切替（無料枠はモデル別のため実効枠が合算される）。切替の順番と条件はモックモデルで単体テスト |
 | エージェント本体の分離 | [`src/ai/agent.ts`](src/ai/agent.ts) | プロンプト＋ツール＋実行設定を`runAgent()`に集約し、HTTPルートとevalsが同一実体を使う |
 | JWTのサーバー内完結 | [`src/lib/agentAuth.ts`](src/lib/agentAuth.ts) | realestate-apiの認証トークンをサーバー側でのみ取得・キャッシュ。`server-only`でクライアント混入をビルド時に遮断 |
 | 画像対応の前方互換設計 | [`src/components/property.tsx`](src/components/property.tsx) | realestate-apiが画像未対応の段階から`imageUrl: string \| null`前提でUIを実装。realestate-apiにVercel Blob対応を追加した瞬間、**このリポジトリのコードは1行も変えずに**実画像へ切り替わった |
@@ -68,8 +68,8 @@
 │ Gemini      │ │ realestate-  │ │ Langfuse    │
 │ 3.5-flash   │ │ api          │ │ Cloud       │
 │ ↓fallback   │ │ (Hono+Neon,  │ │ (トレース)   │
-│ 3.1-flash-  │ │  Vercel)     │ │             │
-│ lite        │ │  ↳ Vercel    │ │             │
+│ 3.5/3.1-    │ │  Vercel)     │ │             │
+│ flash-lite  │ │  ↳ Vercel    │ │             │
 │             │ │    Blob(画像) │ │             │
 └─────────────┘ └──────────────┘ └─────────────┘
 ```
@@ -136,7 +136,7 @@
 
 | 種類 | 実行 | 対象 | 方法 |
 |---|---|---|---|
-| ユニットテスト50件 | `pnpm test`（毎回） | HMAC署名・JWTキャッシュ・エラー整形・**承認ゲート**・UIの純粋ロジック（価格表記・検索条件・会話からの物件引き当て・進捗の判定・.ics生成） | 承認ゲートは`MockLanguageModelV4`に「いきなり書き込みツールを呼ぶ台本」を演じさせ、承認なしに`execute`が走らないことを決定的に検証 |
+| ユニットテスト54件 | `pnpm test`（毎回） | HMAC署名・JWTキャッシュ・エラー整形・**承認ゲート**・モデルのフォールバック・UIの純粋ロジック（価格表記・検索条件・会話からの物件引き当て・進捗の判定・.ics生成） | 承認ゲートは`MockLanguageModelV4`に「いきなり書き込みツールを呼ぶ台本」を演じさせ、承認なしに`execute`が走らないことを決定的に検証 |
 | エージェントevals 2件 | `pnpm test:evals`（明示実行） | **モデルの判断そのもの** | realestate-apiをモックして「6.5万円は0件・7.15万円なら1件」のシナリオを固定し、実モデルで「条件を緩めた再検索が発生する」「氏名・メール未提供のうちは書き込みツールを呼ばない」をツール呼び出し列でアサート |
 
 役割分担のポイント: 「判断の質」は実モデルでしか測れないためrealestate-api側をモックして決定化し、「安全構造」はモデルをモックして毎回のテストに組み込む、という使い分けをしています。実モデルevalsは無料枠を消費するため通常のテストから分離しています。
@@ -155,7 +155,7 @@ Vercel AI SDKのOpenTelemetryテレメトリをLangfuse Cloudに送り、モデ�
 
 エラーを握りつぶさない、を原則にしています。
 
-- **モデル側の503/429**: `ai-fallback`で`gemini-3.5-flash`→`gemini-3.1-flash-lite`へ自動切替（リトライ可能なエラーのみ・60秒後に主モデルへ復帰）。無料枠はモデルごとに別枠のため、実効的な枠の合算にもなっています。開発中に実際に3.5-flashの503が頻発した実体験から、フォールバック先が7ツールの多段フローを完走できることも検証済みです
+- **モデル側の503/429**: `ai-fallback`で`gemini-3.5-flash`→`gemini-3.5-flash-lite`→`gemini-3.1-flash-lite`の順に自動切替（リトライ可能なエラーのみ・60秒後に主モデルへ復帰）。無料枠はモデルごとに別枠のため、実効的な枠の合算にもなっています。開発中に実際に3.5-flashの503が頻発した実体験から、3.1-flash-liteが7ツールの多段フローを完走できることは検証済みです。段ごとの待ち時間で打ち切られないよう、`/api/chat`の`maxDuration`は90秒にしています
 - **無料枠の枯渇（429）**: 「本日のデモ利用枠を使い切りました」と正直に表示します（デモという性質上、自前のレート制限は作り込まない割り切り）
 - **realestate-api側の障害**: ツールは接続失敗やエラーレスポンスを構造化（`{error: {code, message}}`）してAIに返し、AIが正直に報告・リカバリします。検索0件→条件変更、HMAC不一致→確認からやり直し、といった自己修正が実際に動作しています
 
@@ -173,11 +173,11 @@ Googleの公式プロンプト設計ガイドの推奨に基づき、システ�
 |---|---|---|
 | FW | Next.js 16 (App Router) | Route Handler + `after()` |
 | エージェント | Vercel AI SDK v7 | `streamText`マルチステップ・`tool()`・`toolApproval`・`isStepCount` |
-| モデル | Gemini 3.5 Flash（無料枠） | `ai-fallback`で3.1 Flash-Liteへ自動切替 |
+| モデル | Gemini 3.5 Flash（無料枠） | `ai-fallback`で3.5 Flash-Lite → 3.1 Flash-Liteへ順に自動切替 |
 | ツールの実体 | realestate-api（不動産業務管理API） | Hono + Drizzle + Neon（別リポジトリ・デプロイ済み）。画像はVercel Blob（DBにはURLのみ保存） |
 | 可観測性 | Langfuse Cloud | OpenTelemetry経由・無料プラン |
 | UI | React 19 + Tailwind CSS v4 | ツール実行タイムライン・承認カード・進捗ステッパー・チャット内の物件カード・予約完了カード（.ics）・空き枠チップ・物件一覧/詳細ページ |
-| テスト | Vitest | ユニット50件＋実モデルevals 2件（分離実行） |
+| テスト | Vitest | ユニット54件＋実モデルevals 2件（分離実行） |
 | 開発体制 | Claude Code（Anthropic）とのペアプログラミング | 設計の壁打ち・レビュー・実装を協働。UI改善の段階では、設計・レビュー担当のセッションが指示書（受入条件・非目標・担当ファイル）を書き、Claude Code on the Web の複数セッションに並列で実装させてPRをレビューする体制も取った |
 
 ## セットアップ
@@ -197,7 +197,7 @@ pnpm dev
 | `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_BASE_URL` | Langfuseの接続情報（未設定ならトレーシングは自動で無効化） |
 
 ```bash
-pnpm test        # ユニットテスト（50件・モデル呼び出しなし）
+pnpm test        # ユニットテスト（54件・モデル呼び出しなし）
 pnpm test:evals  # エージェントevals（実モデルを叩くため明示実行）
 ```
 

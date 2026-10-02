@@ -9,7 +9,9 @@ import {
 import { runAgent } from "@/ai/agent";
 import { langfuseSpanProcessor } from "@/lib/telemetry";
 
-export const maxDuration = 30;
+// フォールバックは最大3段。503（高負荷）は応答待ちが長引くことがあり、
+// 段ごとに待たされても途中で打ち切られないよう余裕を持たせる
+export const maxDuration = 90;
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
