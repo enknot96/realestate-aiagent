@@ -8,6 +8,7 @@ import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { clearChat, loadChat, saveChat } from "@/components/chat/chat-storage";
 import { ConversationProvider } from "@/components/chat/conversation-context";
+import { ProgressStepper } from "@/components/chat/progress-stepper";
 import { MessageItem } from "@/components/chat/message-item";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { WelcomeMessage } from "@/components/chat/welcome-message";
@@ -159,6 +160,7 @@ function ChatApp() {
     <main className="h-[calc(100dvh-var(--site-header-h))] w-full bg-gray-50">
       <div className="mx-auto flex h-full max-w-3xl flex-col border-gray-200 bg-white sm:border-x">
         <ChatHeader canReset={messages.length > 0} onReset={resetConversation} />
+        <ProgressStepper messages={messages} />
 
         <div className="relative min-h-0 flex-1">
           <div
