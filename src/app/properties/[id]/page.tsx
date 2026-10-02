@@ -65,7 +65,7 @@ export default async function PropertyDetailPage({
 
   const overview: { label: string; value: string }[] = [
     { label: "種別", value: PROPERTY_TYPE_LABEL[property.type] },
-    { label: "価格", value: formatPrice(property.price) },
+    { label: "価格", value: formatPrice(property.price, property.type) },
     { label: "間取り", value: property.layout ?? "-" },
     { label: "専有面積", value: property.area ? `${property.area}㎡` : "-" },
     { label: "所在地", value: property.address || "-" },
@@ -101,12 +101,12 @@ export default async function PropertyDetailPage({
           <PropertyThumbnail property={property} />
         </div>
 
-        <aside className="flex flex-col gap-3 self-start rounded-lg border border-gray-200 bg-white p-4 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-3 lg:row-start-1">
+        <aside className="flex flex-col gap-3 self-start rounded-lg border border-gray-200 bg-white p-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           <span className="w-fit rounded-full bg-brand-teal/10 px-2.5 py-0.5 text-xs font-bold text-brand-teal">
             {PROPERTY_TYPE_LABEL[property.type]}
           </span>
           <h1 className="text-xl font-bold">{property.title}</h1>
-          <p className="text-2xl font-bold text-brand-teal">{formatPrice(property.price)}</p>
+          <p className="text-2xl font-bold text-brand-teal">{formatPrice(property.price, property.type)}</p>
           <ul className="flex flex-col gap-1 border-t border-gray-100 pt-3 text-sm text-gray-700">
             <li>間取り: {property.layout ?? "-"}</li>
             <li>専有面積: {property.area ? `${property.area}㎡` : "-"}</li>
