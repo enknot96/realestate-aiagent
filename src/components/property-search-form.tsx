@@ -162,6 +162,8 @@ export function PropertySearchForm({ initial = {}, variant = "full" }: Props) {
           className={selectClass}
         />
       </div>
+      {/* 並び順は検索フォームの入力項目ではないので、検索し直しても現在の値を引き継ぐ */}
+      {initial.sort && <input type="hidden" name="sort" value={initial.sort} />}
       <div className="flex shrink-0 items-center gap-3">
         <button
           type="submit"
