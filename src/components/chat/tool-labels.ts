@@ -12,8 +12,8 @@ export const FIELD_LABELS: Record<string, string> = {
 };
 
 export const TOOL_TITLES: Record<string, string> = {
-  "tool-createInquiry": "問い合わせを送信します",
-  "tool-createViewing": "内見予約を作成します",
+  "tool-createInquiry": "お問い合わせの送信を確認",
+  "tool-createViewing": "内見予約の確定を確認",
 };
 
 export type ToolView = {

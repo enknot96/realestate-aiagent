@@ -46,7 +46,7 @@ export function ChatPreview() {
           <div className="mt-2 flex gap-2">
             <span className="flex items-center gap-1 rounded-md bg-brand-teal px-3 py-1 text-xs font-bold text-white">
               <CheckIcon className="h-3.5 w-3.5" />
-              承認
+              承認する
             </span>
             <span className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-600">
               やめる
