@@ -57,4 +57,8 @@ export const TOOL_VIEWS: Record<string, ToolView> = {
     running: () => "内見予約を作成中…",
     done: (_i, o) => `内見予約が確定しました（予約ID ${o.viewingId}）`,
   },
+  "tool-simulateMortgage": {
+    running: () => "資金計画を計算中…",
+    done: (_i, o) => `資金計画の目安を計算しました（返済期間${o.years}年）`,
+  },
 };

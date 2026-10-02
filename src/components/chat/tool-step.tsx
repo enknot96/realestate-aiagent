@@ -3,6 +3,7 @@
 import { CheckIcon, ClockIcon, ExclamationIcon, PauseIcon, XCircleIcon } from "@/components/icons";
 import { AvailabilitySlots } from "./availability-slots";
 import { InquiryCompleteCard, ViewingCompleteCard } from "./completion-cards";
+import { MortgageCard } from "./mortgage-card";
 import { PropertyCardRow, PropertyDetailCard } from "./property-links";
 import { TOOL_TITLES, TOOL_VIEWS } from "./tool-labels";
 import type { AvailabilityOutput, ConversationProperty, ToolPart } from "./types";
@@ -83,6 +84,7 @@ export function ToolStep({
   const showDetail = succeeded && part.type === "tool-getPropertyDetail";
   const showViewingCard = succeeded && part.type === "tool-createViewing";
   const showInquiryCard = succeeded && part.type === "tool-createInquiry";
+  const showMortgageCard = succeeded && part.type === "tool-simulateMortgage";
   // 完了カードが同じ情報を出すので、1行表示は短くする
   if (showViewingCard) text = "内見予約を作成しました";
   if (showInquiryCard) text = "問い合わせを作成しました";
@@ -90,7 +92,7 @@ export function ToolStep({
   // 空き枠・カード類の直後に文章が続くと、文章の段落marginと相殺されて約6pxしか空かず窮屈に見える。
   // リッチ表示があるときだけ下に余白を足す（吹き出しの最後なら余計な余白になるので付けない）
   const hasRichContent =
-    showSlots || searchedProperties.length > 0 || showDetail || showViewingCard || showInquiryCard;
+    showSlots || searchedProperties.length > 0 || showDetail || showViewingCard || showInquiryCard || showMortgageCard;
 
   return (
     <div className={`my-0.5 text-sm ${hasRichContent ? "not-last:mb-4" : ""}`}>
@@ -113,6 +115,7 @@ export function ToolStep({
       {showDetail && <PropertyDetailCard property={output as unknown as ConversationProperty} />}
       {showViewingCard && <ViewingCompleteCard input={input} output={output} />}
       {showInquiryCard && <InquiryCompleteCard input={input} output={output} />}
+      {showMortgageCard && <MortgageCard output={output} />}
     </div>
   );
 }
