@@ -86,7 +86,12 @@ export default async function PropertiesPage({
         物件を探す
       </h1>
 
-      <PropertySearchForm initial={conditions} variant="full" />
+      {/* 同じroute内のsearchParams変化ではclient stateが保持されるため、条件をkeyにして再マウントしフォーム表示を追従させる */}
+      <PropertySearchForm
+        key={buildSearchParams(conditions).toString()}
+        initial={conditions}
+        variant="full"
+      />
 
       {chips.length > 0 && (
         <ul className="flex flex-wrap gap-2 text-sm" aria-label="適用中の条件">

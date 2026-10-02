@@ -34,7 +34,7 @@ function PriceOptions({
   return (
     <>
       <option value="">指定なし</option>
-      {extra !== undefined && <option value={extra}>{formatPrice(extra, type)}</option>}
+      {extra !== undefined && <option value={extra}>{formatPrice(extra)}</option>}
       {groups.map((g) => {
         const options = PRICE_PRESETS[g].map((v) => (
           <option key={v} value={v}>
