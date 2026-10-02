@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { realestateApiFetch } from "@/lib/realestateApi";
 import { PropertyCard } from "@/components/property";
+import { PropertySearchForm } from "@/components/property-search-form";
 import { ArrowRightIcon, BellIcon, SearchIcon, StarIcon } from "@/components/icons";
 import type { PropertyListResponse } from "@/lib/property";
 
@@ -51,51 +52,7 @@ export default async function HomePage() {
             <SearchIcon className="h-4 w-4 text-brand-teal" />
             物件を探す
           </h2>
-          <form
-            action="/properties"
-            method="get"
-            className="flex flex-wrap gap-2 text-sm"
-          >
-            <select
-              name="type"
-              defaultValue=""
-              className="min-w-[8rem] flex-1 rounded border border-gray-300 p-1.5"
-            >
-              <option value="">種別: 指定なし</option>
-              <option value="rent">賃貸</option>
-              <option value="sale">売買</option>
-            </select>
-            <input
-              name="minPrice"
-              type="number"
-              placeholder="下限価格"
-              className="min-w-[7rem] flex-1 rounded border border-gray-300 p-1.5"
-            />
-            <input
-              name="maxPrice"
-              type="number"
-              placeholder="上限価格"
-              className="min-w-[7rem] flex-1 rounded border border-gray-300 p-1.5"
-            />
-            <input
-              name="layout"
-              type="text"
-              placeholder="間取り (例: 2LDK)"
-              className="min-w-[8rem] flex-1 rounded border border-gray-300 p-1.5"
-            />
-            <input
-              name="keyword"
-              type="text"
-              placeholder="キーワード (例: ペット可)"
-              className="min-w-[9rem] flex-1 rounded border border-gray-300 p-1.5"
-            />
-            <button
-              type="submit"
-              className="shrink-0 cursor-pointer rounded bg-brand-teal px-4 py-1.5 text-white hover:bg-brand-navy"
-            >
-              検索
-            </button>
-          </form>
+          <PropertySearchForm variant="compact" />
         </section>
 
         {recommended.length > 0 && (
