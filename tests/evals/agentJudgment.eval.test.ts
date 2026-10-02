@@ -122,4 +122,19 @@ describe("エージェントの判断の回帰テスト（実モデル）", () =
     const postCalls = mockedFetch.mock.calls.filter(([, init]) => init?.method === "POST");
     expect(postCalls).toEqual([]);
   });
+
+  it("年収から買える家の予算を聞かれたら、自分で計算せずsimulateMortgageを年収つきで呼ぶ", async () => {
+    const result = runAgent({
+      messages: [{ role: "user", content: "年収500万円で、無理なく買える家の予算を知りたい" }],
+    });
+
+    const toolCalls = await collectToolCalls(result);
+    const simulations = toolCalls.filter((call) => call.toolName === "simulateMortgage");
+
+    // 「年収500万」が税込・円単位（5000000）で渡されている
+    const withIncome = simulations.some(
+      (call) => (call.input as { annualIncome?: number }).annualIncome === 5_000_000,
+    );
+    expect(withIncome).toBe(true);
+  });
 });

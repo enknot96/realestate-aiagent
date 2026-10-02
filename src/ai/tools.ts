@@ -3,6 +3,7 @@ import { z } from "zod";
 import { realestateApiFetch, RealestateApiError } from "@/lib/realestateApi";
 import { getAgentAccessToken, invalidateAgentToken } from "@/lib/agentAuth";
 import { signApprovalPayload, verifyApprovalPayload } from "@/lib/approvalSignature";
+import { simulateMortgage as runMortgageSimulation } from "@/lib/mortgage";
 import type { PropertyDetail, PropertyListResponse } from "@/lib/property";
 
 // ツールのエラーは例外で握りつぶさず、構造化してAIに返す（AIが正直に報告・リカバリできるように）
@@ -141,6 +142,60 @@ export const checkViewingAvailability = tool({
   },
 });
 
+// ── 資金計画（読み取り系・承認不要） ──
+// 計算はすべて決定的な純粋関数（src/lib/mortgage.ts）が行い、AIには計算させない
+export const simulateMortgage = tool({
+  description:
+    "住宅ローンの資金計画をシミュレーションする。変動金利と固定金利の両方を計算して返す。" +
+    "月々の返済額→借りられる額、借入額→月々の返済額、年収→借入額の目安（審査上限・無理のない目安）を出せる。" +
+    "monthlyPayment・loanAmount・annualIncomeのうち少なくとも1つが必要。" +
+    "金利は2026年10月時点の参考値で、審査結果ではない。頭金・諸費用は含まない。",
+  inputSchema: z.object({
+    monthlyPayment: z
+      .number()
+      .positive()
+      .optional()
+      .describe("希望する月々の返済額（円）。例: 月10万円 → 100000"),
+    loanAmount: z
+      .number()
+      .positive()
+      .optional()
+      .describe("借入額（円）。例: 3000万円借りたい → 30000000"),
+    annualIncome: z
+      .number()
+      .positive()
+      .optional()
+      .describe("税込の年収（円）。手取りではない。例: 年収500万 → 5000000"),
+    years: z
+      .number()
+      .int()
+      .min(1)
+      .max(35)
+      .optional()
+      .describe("返済期間（年）。1〜35。ユーザーが言及しなければ省略（既定35年）"),
+    age: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional()
+      .describe("ユーザーの年齢。言及があったときだけ指定する（完済80歳に収まるよう期間が短縮される）"),
+    variableRate: z
+      .number()
+      .min(0)
+      .max(20)
+      .optional()
+      .describe("変動金利の年利（%）。例: 1.5% → 1.5。ユーザーが指定したときだけ使い、なければ省略"),
+    fixedRate: z
+      .number()
+      .min(0)
+      .max(20)
+      .optional()
+      .describe("固定金利の年利（%）。例: 3.5% → 3.5。ユーザーが指定したときだけ使い、なければ省略"),
+  }),
+  // 入力不足・不正は例外を投げず、他のツールと同じ { error: { code, message } } で返す
+  execute: async (input) => runMortgageSimulation(input),
+});
+
 // ── 書き込み系（human-in-the-loop） ──
 // 2段階の設計: prepare系ツールが引数一式へのHMAC署名（確認トークン）を発行し、
 // create系ツールは「同一の引数＋有効なトークン」でなければ実行を拒否する。
@@ -272,6 +327,7 @@ export const agentTools = {
   searchProperties,
   getPropertyDetail,
   checkViewingAvailability,
+  simulateMortgage,
   prepareInquiryConfirmation,
   createInquiry,
   prepareViewingConfirmation,
