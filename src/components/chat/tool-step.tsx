@@ -87,8 +87,13 @@ export function ToolStep({
   if (showViewingCard) text = "内見予約を作成しました";
   if (showInquiryCard) text = "問い合わせを作成しました";
 
+  // 空き枠・カード類の直後に文章が続くと、文章の段落marginと相殺されて約6pxしか空かず窮屈に見える。
+  // リッチ表示があるときだけ下に余白を足す（吹き出しの最後なら余計な余白になるので付けない）
+  const hasRichContent =
+    showSlots || searchedProperties.length > 0 || showDetail || showViewingCard || showInquiryCard;
+
   return (
-    <div className="my-0.5 text-sm">
+    <div className={`my-0.5 text-sm ${hasRichContent ? "not-last:mb-4" : ""}`}>
       <p className={`flex items-center gap-1.5 ${tone}`}>
         <span
           className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${badgeTone}`}
