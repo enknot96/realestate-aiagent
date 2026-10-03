@@ -3,8 +3,11 @@ import {
   buildSearchParams,
   buildZeroResultsQuestion,
   conditionChips,
+  DEFAULT_SORT,
   formatPrice,
   parseSearchConditions,
+  SORT_OPTIONS,
+  sortForApi,
 } from "@/lib/property";
 
 describe("formatPrice（万円表記）", () => {
@@ -59,6 +62,16 @@ describe("parseSearchConditions / buildZeroResultsQuestion", () => {
 });
 
 describe("sort（並び順）", () => {
+  it("APIに渡す並び順は、未指定なら新着順、指定があればその値", () => {
+    expect(sortForApi({})).toBe("newest");
+    expect(sortForApi({ sort: "price_asc" })).toBe("price_asc");
+    expect(DEFAULT_SORT).toBe("newest");
+  });
+
+  it("並び替えの選択肢に「標準（id順）」は無く、先頭が新着順", () => {
+    expect(SORT_OPTIONS.map((o) => o.value)).toEqual(["newest", "price_asc", "price_desc"]);
+  });
+
   it("3つの値はそのまま解釈する", () => {
     for (const sort of ["newest", "price_asc", "price_desc"] as const) {
       expect(parseSearchConditions({ sort }).sort).toBe(sort);
