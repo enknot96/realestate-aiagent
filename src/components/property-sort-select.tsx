@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { buildSearchParams, SORT_OPTIONS, type PropertySearchConditions } from "@/lib/property";
+import { buildSearchParams, DEFAULT_SORT, SORT_OPTIONS, type PropertySearchConditions } from "@/lib/property";
 
 // 一覧の並び替え。現在の絞り込み条件を hidden で持つ GET フォームなので、JS無効でも <noscript> のボタンで動く。
 // offset は送らない＝並び順を変えると1ページ目に戻る
@@ -21,7 +21,7 @@ export function PropertySortSelect({ conditions }: { conditions: PropertySearchC
       <select
         id={id}
         name="sort"
-        defaultValue={sort ?? ""}
+        defaultValue={sort ?? DEFAULT_SORT}
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
         className="rounded border border-gray-300 bg-white p-1.5"
       >
