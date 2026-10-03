@@ -11,6 +11,7 @@ import {
   buildZeroResultsQuestion,
   conditionChips,
   parseSearchConditions,
+  sortForApi,
   type PropertyListResponse,
   type PropertySearchConditions,
 } from "@/lib/property";
@@ -67,6 +68,7 @@ export default async function PropertiesPage({
   const conditions = parseSearchConditions(sp);
   const offset = parseOffset(sp.offset);
   const query = buildSearchParams(conditions);
+  query.set("sort", sortForApi(conditions));
   query.set("offset", String(offset));
   query.set("limit", String(LIMIT));
 

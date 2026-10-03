@@ -229,15 +229,21 @@ export const PRICE_PRESETS: Record<PropertySummary["type"], number[]> = {
 
 export const LAYOUT_OPTIONS = ["1K", "1DK", "1LDK", "2DK", "2LDK", "3LDK", "4LDK", "5DK"];
 
-// 一覧の並び順。APIの sort パラメータの値と一致させる（未指定は id 昇順の「標準」）
+// 一覧の並び順。APIの sort パラメータの値と一致させる（未指定は新着順。新しく掲載した物件を先頭に出す）
 export type PropertySort = "newest" | "price_asc" | "price_desc";
 
-export const SORT_OPTIONS: { value: PropertySort | ""; label: string }[] = [
-  { value: "", label: "標準" },
+export const DEFAULT_SORT: PropertySort = "newest";
+
+export const SORT_OPTIONS: { value: PropertySort; label: string }[] = [
   { value: "newest", label: "新着順" },
   { value: "price_asc", label: "価格の安い順" },
   { value: "price_desc", label: "価格の高い順" },
 ];
+
+// APIに渡す並び順。URLで未指定なら既定（新着順）にする。URLには既定値を載せない
+export function sortForApi(conditions: PropertySearchConditions): PropertySort {
+  return conditions.sort ?? DEFAULT_SORT;
+}
 
 // URLの searchParams を正規化した検索条件。値が不正な項目は undefined（＝未指定）として扱う
 export type PropertySearchConditions = {

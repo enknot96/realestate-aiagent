@@ -5,7 +5,7 @@ import { PropertySearchForm } from "@/components/property-search-form";
 import { ArrowRightIcon, BellIcon, SearchIcon, StarIcon } from "@/components/icons";
 import { HeroChatEntry } from "@/components/home/hero-chat-entry";
 import { HowItWorks } from "@/components/home/how-it-works";
-import type { PropertyListResponse } from "@/lib/property";
+import { DEFAULT_SORT, type PropertyListResponse } from "@/lib/property";
 
 // 今回はCMS等を持たないため、ダミーの固定文言を表示する（今後のタスクで見直し予定）
 const NEWS_ITEMS = [
@@ -18,7 +18,8 @@ const NEWS_ITEMS = [
 
 async function fetchRecommended() {
   try {
-    const data = await realestateApiFetch<PropertyListResponse>("/properties?limit=4");
+    // 新しく掲載した物件を先に出す
+    const data = await realestateApiFetch<PropertyListResponse>(`/properties?limit=4&sort=${DEFAULT_SORT}`);
     return data.properties;
   } catch {
     // ④が一時的に落ちていても、おすすめ物件を非表示にしてHome自体は表示する
