@@ -57,11 +57,11 @@ export function SiteFooter() {
           <dl className="mt-3 space-y-2 text-sm text-gray-600">
             <div>
               <dt className="font-medium text-brand-navy">所在地</dt>
-              <dd>〒150-0002 東京都渋谷区渋谷2-21-1 みらいビル 3F</dd>
+              <dd>兵庫県西宮市みらい町1-2-3 みらいビル 3F</dd>
             </div>
             <div>
               <dt className="font-medium text-brand-navy">免許番号</dt>
-              <dd>東京都知事 (1) 第102345号</dd>
+              <dd>兵庫県知事 (1) 第102345号</dd>
             </div>
           </dl>
         </div>

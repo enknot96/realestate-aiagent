@@ -18,6 +18,10 @@ function pickProperty(value: unknown): ConversationProperty | undefined {
   if (typeof value.imageUrl === "string" || value.imageUrl === null) {
     picked.imageUrl = value.imageUrl;
   }
+  for (const key of ["saleKind", "landArea", "buildingArea"] as const) {
+    const v = value[key];
+    if (typeof v === "string" || v === null) picked[key] = v;
+  }
   return picked;
 }
 
