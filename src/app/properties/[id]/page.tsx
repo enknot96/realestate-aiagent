@@ -7,7 +7,14 @@ import { PropertyThumbnail } from "@/components/property";
 import { BackToListLink } from "@/components/back-to-list-link";
 import { PropertyConsultCta } from "@/components/property-cta";
 import { SimilarProperties } from "@/components/similar-properties";
-import { formatPrice, PROPERTY_TYPE_LABEL, type PropertyDetail } from "@/lib/property";
+import {
+  buildOverviewRows,
+  formatAccess,
+  formatPrice,
+  propertyKindLabel,
+  summarizeArea,
+  type PropertyDetail,
+} from "@/lib/property";
 
 // 正の整数のみ許可（"abc"・"-1"・"1.5"・"01" などはAPIを呼ばずに404）
 function parseId(raw: string): number | null {
@@ -63,13 +70,9 @@ export default async function PropertyDetailPage({
   const property = await getProperty(id);
   if (!property) notFound();
 
-  const overview: { label: string; value: string }[] = [
-    { label: "種別", value: PROPERTY_TYPE_LABEL[property.type] },
-    { label: "価格", value: formatPrice(property.price, property.type) },
-    { label: "間取り", value: property.layout ?? "-" },
-    { label: "専有面積", value: property.area ? `${property.area}㎡` : "-" },
-    { label: "所在地", value: property.address || "-" },
-  ];
+  const overview = buildOverviewRows(property);
+  const summaryArea = summarizeArea(property);
+  const access = formatAccess(property);
 
   return (
     // 下部固定CTAバー（スマホ）はmain末尾のstickyで実現し、フッターに重ならないようにする
@@ -103,13 +106,14 @@ export default async function PropertyDetailPage({
 
         <aside className="flex flex-col gap-3 self-start rounded-lg border border-gray-200 bg-white p-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           <span className="w-fit rounded-full bg-brand-teal/10 px-2.5 py-0.5 text-xs font-bold text-brand-teal">
-            {PROPERTY_TYPE_LABEL[property.type]}
+            {propertyKindLabel(property)}
           </span>
           <h1 className="text-xl font-bold">{property.title}</h1>
           <p className="text-2xl font-bold text-brand-teal">{formatPrice(property.price, property.type)}</p>
           <ul className="flex flex-col gap-1 border-t border-gray-100 pt-3 text-sm text-gray-700">
-            <li>間取り: {property.layout ?? "-"}</li>
-            <li>専有面積: {property.area ? `${property.area}㎡` : "-"}</li>
+            {property.layout && <li>間取り: {property.layout}</li>}
+            <li>面積: {summaryArea || "-"}</li>
+            {access && <li>交通: {access}</li>}
             <li>所在地: {property.address || "-"}</li>
           </ul>
           <PropertyConsultCta title={property.title} className="hidden lg:flex" />

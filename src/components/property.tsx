@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { formatPrice, PROPERTY_TYPE_LABEL, type PropertySummary } from "@/lib/property";
+import { formatPrice, propertyKindLabel, summarizeSpec, type PropertySummary } from "@/lib/property";
 
 // ④が画像未対応の間・画像未アップロードの物件は imageUrl が null/undefined で届く。
 // その場合はプレースホルダーを表示する（本物の画像が入り次第、自動で切り替わる）
@@ -64,15 +64,14 @@ export function PropertyCard({ property }: { property: PropertySummary }) {
             property.type === "rent" ? "bg-brand-teal" : "bg-brand-navy"
           }`}
         >
-          {PROPERTY_TYPE_LABEL[property.type]}
+          {propertyKindLabel(property)}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-sm font-bold">{property.title}</h3>
         <p className="text-base font-bold text-brand-teal">{formatPrice(property.price, property.type)}</p>
         <p className="text-xs text-gray-500">
-          {property.layout ?? "-"}
-          {property.area ? ` / ${property.area}㎡` : ""}
+          {summarizeSpec(property)}
         </p>
         <p className="mt-auto text-xs text-gray-500">{property.address}</p>
       </div>

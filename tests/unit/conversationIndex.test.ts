@@ -37,6 +37,26 @@ describe("buildConversationIndex", () => {
     expect(index.findProperty(3)).toBeUndefined();
   });
 
+  it("種別・土地面積・建物面積を取り出す（型が合わないものは無視）", () => {
+    const index = buildConversationIndex([
+      toolMessage([
+        searchPart([
+          property(1, { saleKind: "used_house", landArea: "120.30", buildingArea: "98.50" }),
+          property(2, { saleKind: null, landArea: 120, buildingArea: undefined }),
+        ]),
+      ]),
+    ]);
+    expect(index.findProperty(1)).toMatchObject({
+      saleKind: "used_house",
+      landArea: "120.30",
+      buildingArea: "98.50",
+    });
+    const p2 = index.findProperty(2);
+    expect(p2?.saleKind).toBeNull();
+    expect(p2).not.toHaveProperty("landArea");
+    expect(p2).not.toHaveProperty("buildingArea");
+  });
+
   it("同じIDは後に出た詳細の結果で上書きされる", () => {
     const index = buildConversationIndex([
       toolMessage([searchPart([property(1, { imageUrl: null })])]),
