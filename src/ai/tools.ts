@@ -23,6 +23,12 @@ export const searchProperties = tool({
       .enum(["rent", "sale"])
       .optional()
       .describe("物件種別。rent=賃貸、sale=売買。ユーザーの意図から判断する"),
+    saleKind: z
+      .enum(["land", "new_house", "used_house", "used_mansion"])
+      .optional()
+      .describe(
+        "売買物件の種別。売地=land、新築戸建=new_house、中古戸建=used_house、中古マンション=used_mansion。指定するときは type も sale にする",
+      ),
     minPrice: z.number().int().nonnegative().optional().describe("下限価格（円）。賃貸は月額家賃"),
     maxPrice: z
       .number()
@@ -43,6 +49,7 @@ export const searchProperties = tool({
   execute: async (input) => {
     const params = new URLSearchParams();
     if (input.type) params.set("type", input.type);
+    if (input.saleKind) params.set("saleKind", input.saleKind);
     if (input.minPrice !== undefined) params.set("minPrice", String(input.minPrice));
     if (input.maxPrice !== undefined) params.set("maxPrice", String(input.maxPrice));
     if (input.layout) params.set("layout", input.layout);
@@ -64,6 +71,13 @@ export const searchProperties = tool({
           area: p.area,
           address: p.address,
           imageUrl: p.imageUrl ?? null,
+          saleKind: p.saleKind ?? null,
+          landArea: p.landArea ?? null,
+          buildingArea: p.buildingArea ?? null,
+          builtYearMonth: p.builtYearMonth ?? null,
+          nearestStation: p.nearestStation ?? null,
+          walkMinutes: p.walkMinutes ?? null,
+          accessNote: p.accessNote ?? null,
           // 説明文はモデルのコンテキスト節約のため冒頭のみ渡す
           description: p.description ? p.description.slice(0, 100) : null,
         })),
@@ -92,6 +106,20 @@ export const getPropertyDetail = tool({
         area: p.area,
         address: p.address,
         imageUrl: p.imageUrl ?? null,
+        saleKind: p.saleKind ?? null,
+        landArea: p.landArea ?? null,
+        privateRoadArea: p.privateRoadArea ?? null,
+        buildingArea: p.buildingArea ?? null,
+        builtYearMonth: p.builtYearMonth ?? null,
+        nearestStation: p.nearestStation ?? null,
+        walkMinutes: p.walkMinutes ?? null,
+        accessNote: p.accessNote ?? null,
+        floorCount: p.floorCount ?? null,
+        floorNumber: p.floorNumber ?? null,
+        balconyArea: p.balconyArea ?? null,
+        managementFee: p.managementFee ?? null,
+        repairReserveFee: p.repairReserveFee ?? null,
+        managementType: p.managementType ?? null,
       };
     } catch (error) {
       return toToolError(error);

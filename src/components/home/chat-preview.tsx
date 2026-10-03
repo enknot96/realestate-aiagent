@@ -42,7 +42,7 @@ export function ChatPreview() {
             <CalendarIcon className="h-4 w-4" />
             内見予約の確認
           </p>
-          <p className="mt-1 text-xs text-gray-700">7/28(火) 14:00 ・ 渋谷区 2LDK</p>
+          <p className="mt-1 text-xs text-gray-700">7/28(火) 14:00 ・ 杉並区 2LDK</p>
           <div className="mt-2 flex gap-2">
             <span className="flex items-center gap-1 rounded-md bg-brand-teal px-3 py-1 text-xs font-bold text-white">
               <CheckIcon className="h-3.5 w-3.5" />

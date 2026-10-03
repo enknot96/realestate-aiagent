@@ -39,6 +39,9 @@ export type ConversationProperty = {
   area?: string | null;
   address?: string;
   imageUrl?: string | null;
+  saleKind?: string | null;
+  landArea?: string | null;
+  buildingArea?: string | null;
 };
 
 export type ConversationIndex = {

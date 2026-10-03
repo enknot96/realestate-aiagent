@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { PropertyThumbnail } from "@/components/property";
 import { ArrowRightIcon } from "@/components/icons";
-import { buildSearchParams, formatPrice, PROPERTY_TYPE_LABEL } from "@/lib/property";
+import { buildSearchParams, formatPrice, propertyKindLabel, summarizeSpec } from "@/lib/property";
 import type { PropertySearchConditions } from "@/lib/property";
 import type { ConversationProperty } from "./types";
 
-function typeBadge(type: string | undefined) {
+function typeBadge(p: ConversationProperty) {
+  const type = p.type;
   if (type !== "rent" && type !== "sale") return null;
   return (
     <span
@@ -15,13 +16,13 @@ function typeBadge(type: string | undefined) {
         type === "rent" ? "bg-brand-teal" : "bg-brand-navy"
       }`}
     >
-      {PROPERTY_TYPE_LABEL[type]}
+      {propertyKindLabel(p)}
     </span>
   );
 }
 
 function specText(p: ConversationProperty): string {
-  return `${p.layout ?? "-"}${p.area ? ` / ${p.area}㎡` : ""}`;
+  return summarizeSpec(p);
 }
 
 function asType(type: string | undefined) {
@@ -63,7 +64,7 @@ export function PropertyCardRow({
           >
             <div className="relative aspect-[4/3] w-full overflow-hidden">
               <PropertyThumbnail property={{ imageUrl: p.imageUrl, title: p.title ?? "物件" }} />
-              {typeBadge(p.type)}
+              {typeBadge(p)}
             </div>
             <div className="flex flex-1 flex-col gap-0.5 p-2.5">
               <h3 className="line-clamp-2 text-xs font-bold">{p.title}</h3>
@@ -100,7 +101,7 @@ export function PropertyDetailCard({ property: p }: { property: ConversationProp
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden">
         <PropertyThumbnail property={{ imageUrl: p.imageUrl, title: p.title ?? "物件" }} />
-        {typeBadge(p.type)}
+        {typeBadge(p)}
       </div>
       <div className="flex flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-sm font-bold">{p.title}</h3>

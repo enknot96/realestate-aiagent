@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 const COMPANY_INFO: { label: string; value: string | string[] }[] = [
   { label: "会社名", value: "みらい不動産株式会社（Mirai Real Estate Co., Ltd.）" },
   { label: "設立", value: "2020年4月" },
-  { label: "所在地", value: "〒150-0002 東京都渋谷区渋谷2-21-1 みらいビル 3F" },
+  { label: "所在地", value: "兵庫県西宮市みらい町1-2-3 みらいビル 3F" },
   { label: "代表者", value: "代表取締役 未来 拓也（みらい たくや）" },
   {
     label: "事業内容",
@@ -18,7 +18,7 @@ const COMPANY_INFO: { label: string; value: string | string[] }[] = [
       "スマートホーム導入コンサルティング",
     ],
   },
-  { label: "免許番号", value: "東京都知事 (1) 第102345号" },
+  { label: "免許番号", value: "兵庫県知事 (1) 第102345号" },
 ];
 
 export default function CompanyPage() {
