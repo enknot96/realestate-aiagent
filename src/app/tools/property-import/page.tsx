@@ -21,6 +21,9 @@ export default function PropertyImportPage() {
             図面・チラシ・マイソクの画像をアップロードすると、AIが物件情報を読み取り、紹介文まで作って登録の下書きを出します。
             手入力の手間を減らし、担当者は「要確認」の項目を見比べるだけで済みます。
           </p>
+          <p className="max-w-3xl text-sm leading-relaxed text-white/90">
+            他社から届いた図面・マイソクを自社サイトやポータルに載せるときの転記や、土地探しのお客様向けに届く売地の資料の整理にお使いいただけます。
+          </p>
           <p className="max-w-3xl rounded-lg bg-white/15 px-3 py-2 text-xs">
             デモのため、アップロードした画像は保存せず、物件の登録も行いません。
           </p>
