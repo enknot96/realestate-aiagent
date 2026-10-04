@@ -44,12 +44,6 @@ export function SiteFooter() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/tools/property-import"
-            className="mt-3 inline-block text-xs text-gray-500 hover:text-brand-teal"
-          >
-            事業者向け: 物件資料の読み取りデモ
-          </Link>
         </nav>
 
         <div>

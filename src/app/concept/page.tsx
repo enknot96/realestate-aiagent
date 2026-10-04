@@ -1,16 +1,33 @@
 import type { Metadata } from "next";
-import { PersonIcon } from "@/components/icons";
+import { BuildingIcon, PersonIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "みらい不動産について | みらい不動産",
   description:
-    "「変わる暮らしに、変わらない安心を。」みらい不動産の設立ストーリーと、私たちが目指す住まい探しの形をご紹介します。",
+    "「変わる暮らしに、変わらない安心を。」みらい不動産の設立ストーリーと、私たちが目指す住まい探しの形、会社概要をご紹介します。",
 };
 
 const STORY_PARAGRAPHS = [
   "代表は元々IT業界の出身。自身が引っ越しをする際、不動産業界のアナログな手続きや情報の不透明さに疑問を抱きました。",
   "「テクノロジーをもっと活用すれば、住まい探しはもっとワクワクして、安心できるものになるはずだ」。その想いから立ち上げたのが「みらい不動産」です。",
   "私たちは、AIを活用したあなたにぴったりの物件マッチングや、自宅からできるVR内見、ペーパーレスなオンライン契約をいち早く導入。単なる場所貸しではなく、あなたの「未来のライフスタイル」をデザインするパートナーでありたいと考えています。",
+];
+
+// 旧「会社概要」ページ（/company）の内容。/company は /concept へ転送している（next.config.ts）
+const COMPANY_INFO: { label: string; value: string | string[] }[] = [
+  { label: "会社名", value: "みらい不動産株式会社（Mirai Real Estate Co., Ltd.）" },
+  { label: "設立", value: "2020年4月" },
+  { label: "所在地", value: "兵庫県西宮市みらい町1-2-3 みらいビル 3F" },
+  { label: "代表者", value: "代表取締役 未来 拓也（みらい たくや）" },
+  {
+    label: "事業内容",
+    value: [
+      "不動産売買・賃貸の仲介および管理",
+      "リノベーションの企画・設計",
+      "スマートホーム導入コンサルティング",
+    ],
+  },
+  { label: "免許番号", value: "兵庫県知事 (1) 第102345号" },
 ];
 
 export default function ConceptPage() {
@@ -55,6 +72,31 @@ export default function ConceptPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        <div>
+          <h2 className="mb-3 flex items-center justify-center gap-2 text-lg font-bold sm:justify-start">
+            <BuildingIcon className="h-5 w-5 text-brand-teal" />
+            会社概要
+          </h2>
+          <dl className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+            {COMPANY_INFO.map((item) => (
+              <div key={item.label} className="flex flex-col gap-1 p-4 text-sm sm:flex-row sm:gap-6">
+                <dt className="w-full shrink-0 font-bold text-gray-500 sm:w-32">{item.label}</dt>
+                <dd className="text-gray-800">
+                  {Array.isArray(item.value) ? (
+                    <ul className="list-disc space-y-0.5 pl-4">
+                      {item.value.map((v) => (
+                        <li key={v}>{v}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    item.value
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
     </main>
