@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { formatPrice } from "@/lib/property";
+import { formatPrice, SALE_KIND_LABEL, type SaleKind } from "@/lib/property";
 import {
+  formatTsubo,
+  isBuiltYearMonth,
+  isFieldVisible,
   toDraftJson,
   type DraftFieldKey,
   type DraftFormState,
@@ -53,7 +56,10 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
   const [chipInput, setChipInput] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const u = (key: DraftFieldKey) => uncertain.has(key);
+  const show = (key: DraftFieldKey) => isFieldVisible(state, key);
+  // 種別に合わず隠れている項目は、強調も件数も対象外にする
+  const u = (key: DraftFieldKey) => show(key) && uncertain.has(key);
+  const uncertainCount = [...uncertain].filter(show).length;
   const cls = (key: DraftFieldKey) =>
     `${inputBase} ${u(key) ? "border-amber-400 bg-white" : "border-gray-300"}`;
 
@@ -75,9 +81,9 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      {uncertain.size > 0 && (
+      {uncertainCount > 0 && (
         <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          資料から読み取れず、AIが推測した項目が <b>{uncertain.size}件</b>
+          資料から読み取れず、AIが推測した項目が <b>{uncertainCount}件</b>
           あります。琥珀色の「要確認」の項目を資料と見比べて確認してください。
         </p>
       )}
@@ -94,6 +100,22 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
             <option value="sale">売買</option>
           </select>
         </Field>
+        {show("saleKind") && (
+          <Field label="物件種別" uncertain={u("saleKind")}>
+            <select
+              value={state.saleKind}
+              onChange={(e) => onChange("saleKind", e.target.value as DraftFormState["saleKind"])}
+              className={cls("saleKind")}
+            >
+              <option value="">未選択</option>
+              {(Object.keys(SALE_KIND_LABEL) as SaleKind[]).map((kind) => (
+                <option key={kind} value={kind}>
+                  {SALE_KIND_LABEL[kind]}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
         <Field label="物件名" uncertain={u("title")}>
           <input
             value={state.title}
@@ -119,21 +141,55 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
             className={cls("price")}
           />
         </Field>
-        <Field label="間取り" uncertain={u("layout")}>
-          <input
-            value={state.layout}
-            onChange={(e) => onChange("layout", e.target.value)}
-            className={cls("layout")}
-          />
-        </Field>
-        <Field label="面積（㎡）" uncertain={u("area")}>
-          <input
-            inputMode="decimal"
-            value={state.area}
-            onChange={(e) => onChange("area", e.target.value)}
-            className={cls("area")}
-          />
-        </Field>
+        {show("layout") && (
+          <Field label="間取り" uncertain={u("layout")}>
+            <input
+              value={state.layout}
+              onChange={(e) => onChange("layout", e.target.value)}
+              className={cls("layout")}
+            />
+          </Field>
+        )}
+        {show("area") && (
+          <Field label="専有面積（㎡）" uncertain={u("area")}>
+            <input
+              inputMode="decimal"
+              value={state.area}
+              onChange={(e) => onChange("area", e.target.value)}
+              className={cls("area")}
+            />
+          </Field>
+        )}
+        {show("landArea") && (
+          <Field label="土地面積（㎡）" uncertain={u("landArea")} hint={formatTsubo(state.landArea)}>
+            <input
+              inputMode="decimal"
+              value={state.landArea}
+              onChange={(e) => onChange("landArea", e.target.value)}
+              className={cls("landArea")}
+            />
+          </Field>
+        )}
+        {show("privateRoadArea") && (
+          <Field label="私道負担（㎡）" uncertain={u("privateRoadArea")} hint="無い場合は 0">
+            <input
+              inputMode="decimal"
+              value={state.privateRoadArea}
+              onChange={(e) => onChange("privateRoadArea", e.target.value)}
+              className={cls("privateRoadArea")}
+            />
+          </Field>
+        )}
+        {show("buildingArea") && (
+          <Field label="建物面積（㎡）" uncertain={u("buildingArea")} hint={formatTsubo(state.buildingArea)}>
+            <input
+              inputMode="decimal"
+              value={state.buildingArea}
+              onChange={(e) => onChange("buildingArea", e.target.value)}
+              className={cls("buildingArea")}
+            />
+          </Field>
+        )}
         <Field label="住所" uncertain={u("address")}>
           <input
             value={state.address}
@@ -141,7 +197,7 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
             className={cls("address")}
           />
         </Field>
-        <Field label="最寄り駅" uncertain={u("nearestStation")}>
+        <Field label="最寄り駅" uncertain={u("nearestStation")} hint="駅名のみ（例: 逆瀬川）">
           <input
             value={state.nearestStation}
             onChange={(e) => onChange("nearestStation", e.target.value)}
@@ -156,14 +212,24 @@ export function DraftForm({ state, uncertain, onChange }: Props) {
             className={cls("walkMinutes")}
           />
         </Field>
-        <Field label="築年（西暦）" uncertain={u("builtYear")}>
-          <input
-            inputMode="numeric"
-            value={state.builtYear}
-            onChange={(e) => onChange("builtYear", e.target.value)}
-            className={cls("builtYear")}
-          />
-        </Field>
+        {show("builtYearMonth") && (
+          <Field
+            label="築年月"
+            uncertain={u("builtYearMonth")}
+            hint={
+              state.builtYearMonth.trim() === "" || isBuiltYearMonth(state.builtYearMonth)
+                ? "例: 2002-03"
+                : "月まで入力すると（例: 2002-03）登録用のJSONに入ります"
+            }
+          >
+            <input
+              value={state.builtYearMonth}
+              onChange={(e) => onChange("builtYearMonth", e.target.value)}
+              placeholder="YYYY-MM"
+              className={cls("builtYearMonth")}
+            />
+          </Field>
+        )}
       </div>
 
       <div
