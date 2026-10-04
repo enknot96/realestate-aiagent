@@ -10,6 +10,7 @@ import {
   DocumentIcon,
   DocumentSearchIcon,
   MapPinIcon,
+  SendIcon,
   ShieldCheckIcon,
 } from "@/components/icons";
 
@@ -45,8 +46,8 @@ type Feature = {
   image: string;
   imageAlt: string;
   icon: ReactNode;
-  // href が無いものは公開準備中として、押せないボタンを出す
-  cta: { label: string; href?: string };
+  // href が無いものは公開準備中として、押せないボタンを出す。external は別の作品（別サイト）へのリンク
+  cta: { label: string; href?: string; external?: { note: string } };
 };
 
 const CUSTOMER_FEATURES: Feature[] = [
@@ -81,7 +82,7 @@ const CUSTOMER_FEATURES: Feature[] = [
 const BUSINESS_FEATURES: Feature[] = [
   {
     title: "物件資料の読み取り",
-    lead: "図面・チラシ・マイソクの画像から物件情報を読み取り、紹介文まで作った「登録の下書き」をお出しします。手入力の手間を減らす営業ツールです。",
+    lead: "他社から届いた図面・チラシ・マイソクの画像から物件情報を読み取り、紹介文まで作った「登録の下書き」をお出しします。自社サイトへの掲載や、土地探しのお客様への提案のための転記作業を減らす営業ツールです。",
     points: [
       "読み取りに自信がない項目は「要確認」で強調し、担当者は資料と見比べるだけで済みます",
       "紹介文は資料に書かれた事実だけで作り、誇大な表現を避けます",
@@ -91,6 +92,23 @@ const BUSINESS_FEATURES: Feature[] = [
     imageAlt: "物件資料の画像から登録の下書きを作る様子",
     icon: <DocumentIcon className="h-14 w-14" />,
     cta: { label: "デモを試す", href: "/tools/property-import" },
+  },
+  {
+    title: "マイソク作成・LINE配信",
+    lead: "登録済みの物件データからマイソク（物件資料）を組み立て、担当者が確認したうえでLINEでお客様にお届けします。物件資料の読み取りとは逆向きの、「データから資料をつくる」営業ツールです。",
+    points: [
+      "用途地域・学区・ハザード情報などを、公的なデータから自動で取り込みます",
+      "AIが紹介文の下書きを作り、広告で使えない表現は保存の前に止めます",
+      "担当者が承認してから、「買主」などのタグを付けたお客様にLINEで配信します",
+    ],
+    image: "/ai-maisoku.jpeg",
+    imageAlt: "物件データからマイソクを作り、LINEでお客様に届ける様子",
+    icon: <SendIcon className="h-14 w-14" />,
+    cta: {
+      label: "CRMのデモを開く",
+      href: "https://crm-realestate-vert.vercel.app",
+      external: { note: "別サイト（みらい不動産 CRM）が開きます。ログイン画面のボタンからそのまま入れます。" },
+    },
   },
 ];
 
@@ -128,7 +146,20 @@ function FeatureRow({ feature, reverse }: { feature: Feature; reverse: boolean }
             </li>
           ))}
         </ul>
-        {feature.cta.href ? (
+        {feature.cta.href && feature.cta.external ? (
+          <div className="flex flex-col gap-1.5">
+            <a
+              href={feature.cta.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex w-fit items-center gap-2 rounded-lg bg-brand-teal px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-navy"
+            >
+              {feature.cta.label}
+              <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+            </a>
+            <p className="text-xs text-gray-500">{feature.cta.external.note}</p>
+          </div>
+        ) : feature.cta.href ? (
           <Link
             href={feature.cta.href}
             className="group flex w-fit items-center gap-2 rounded-lg bg-brand-teal px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-navy"
