@@ -11,8 +11,9 @@ import { MAX_IMAGE_BYTES, validateImageFile } from "./validation";
 // 作者がサンプル画像を用意したら、ここに { label, src } を足すと「サンプルで試す」が出る
 // （src は public/ 配下のパス。例: "/samples/property-import-1.png"）
 const SAMPLE_IMAGES: { label: string; src: string }[] = [
-  // みらい不動産の架空のマイソク（realestate-api の物件 id 2 のデータを元に作成）
-  { label: "賃貸アパートのマイソク", src: "/samples/maisoku-sample-rent.jpg" },
+  // みらい不動産の架空のマイソク（realestate-api の物件 id 66・65 のデータと写真を元に作成。元の HTML は docs/maisoku-samples）
+  { label: "売地のマイソク", src: "/samples/maisoku-sample-land.jpg" },
+  { label: "中古戸建のマイソク", src: "/samples/maisoku-sample-house.jpg" },
 ];
 
 type Status = "idle" | "loading" | "done" | "error";
